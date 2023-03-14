@@ -124,7 +124,7 @@ public final class ArbitraryTraverser {
 		@Nullable Property resolvedParentProperty,
 		TraverseContext context
 	) {
-		Set<ArbitraryNode> children = new LinkedHashSet<>();
+		List<ArbitraryNode> children = new ArrayList<>();
 		ObjectProperty objectProperty = arbitraryProperty.getObjectProperty();
 		ContainerProperty containerProperty = arbitraryProperty.getContainerProperty();
 		boolean container = containerProperty != null;
@@ -164,7 +164,7 @@ public final class ArbitraryTraverser {
 		return new ArbitraryNode(
 			resolvedParentProperty,
 			arbitraryProperty,
-			new ArrayList<>(children)
+			children
 		);
 	}
 
@@ -174,7 +174,7 @@ public final class ArbitraryTraverser {
 		Property resolvedParentProperty,
 		TraverseContext context
 	) {
-		Set<ArbitraryNode> children = new LinkedHashSet<>();
+		List<ArbitraryNode> children = new ArrayList<>();
 		List<ContainerInfoManipulator> containerInfoManipulators = context.getContainerInfoManipulators();
 		boolean container = parentArbitraryProperty.getContainerProperty() != null;
 
@@ -251,6 +251,6 @@ public final class ArbitraryTraverser {
 			}
 			children.add(childNode);
 		}
-		return new ArrayList<>(children);
+		return children;
 	}
 }

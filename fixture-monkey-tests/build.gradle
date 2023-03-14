@@ -2,6 +2,7 @@ allprojects {
     tasks.generatePomFileForMavenJavaPublication.enabled = false
     tasks.generateMetadataFileForMavenJavaPublication.enabled = false
     tasks.publishMavenJavaPublicationToMavenLocal.enabled = false
+    tasks.publishMavenJavaPublicationToSonatypeRepository.enabled = false
     tasks.jar.enabled = false
     tasks.javadocJar.enabled = false
     tasks.sourcesJar.enabled = false
