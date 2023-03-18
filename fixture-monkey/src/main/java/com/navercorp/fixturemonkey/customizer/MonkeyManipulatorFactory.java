@@ -32,6 +32,7 @@ import org.apiguardian.api.API.Status;
 
 import net.jqwik.api.Arbitrary;
 
+import com.navercorp.fixturemonkey.api.customizer.MethodInterface;
 import com.navercorp.fixturemonkey.api.generator.ArbitraryContainerInfo;
 import com.navercorp.fixturemonkey.api.lazy.LazyArbitrary;
 import com.navercorp.fixturemonkey.customizer.InnerSpecState.ManipulatorHolderSet;
@@ -198,6 +199,8 @@ public final class MonkeyManipulatorFactory {
 			return new NodeNullityManipulator(false);
 		} else if (value instanceof Just) {
 			return new NodeSetJustManipulator((Just)value);
+		} else if (value instanceof MethodInterface) {
+			return new NodeSetJustManipulator(Values.just(value));
 		} else if (value instanceof Arbitrary) {
 			return new NodeSetLazyManipulator<>(
 				sequence,
