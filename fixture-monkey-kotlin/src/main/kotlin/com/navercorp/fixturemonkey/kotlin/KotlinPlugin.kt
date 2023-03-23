@@ -23,10 +23,13 @@ import com.navercorp.fixturemonkey.api.generator.ObjectPropertyGenerator
 import com.navercorp.fixturemonkey.api.matcher.MatcherOperator
 import com.navercorp.fixturemonkey.api.option.GenerateOptionsBuilder
 import com.navercorp.fixturemonkey.api.plugin.Plugin
+import com.navercorp.fixturemonkey.api.type.Types
+import com.navercorp.fixturemonkey.kotlin.generator.InterfaceKFunctionPropertyGenerator
 import com.navercorp.fixturemonkey.kotlin.generator.KotlinPropertyGenerator
 import com.navercorp.fixturemonkey.kotlin.introspector.PrimaryConstructorArbitraryIntrospector
 import org.apiguardian.api.API
 import org.apiguardian.api.API.Status.EXPERIMENTAL
+import java.lang.reflect.Modifier
 
 @API(since = "0.4.0", status = EXPERIMENTAL)
 class KotlinPlugin : Plugin {
@@ -44,6 +47,12 @@ class KotlinPlugin : Plugin {
                         )
                             .generate(context)
                     },
+                ),
+            )
+            .insertFirstPropertyGenerator(
+                MatcherOperator(
+                    { p -> Modifier.isInterface(Types.getActualType(p.type).modifiers) },
+                    InterfaceKFunctionPropertyGenerator(),
                 ),
             )
     }
