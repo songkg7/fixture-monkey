@@ -18,46 +18,78 @@
 
 package com.navercorp.fixturemonkey.api.generator;
 
-import java.util.function.Function;
 import java.util.function.Predicate;
+
+import javax.validation.ConstraintViolationException;
 
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
-import net.jqwik.api.Arbitrary;
+import net.jqwik.api.TooManyFilterMissesException;
 
 @API(since = "0.5.0", status = Status.EXPERIMENTAL)
 public final class FilteredCombinableArbitrary implements CombinableArbitrary {
+	private final int maxMisses;
 	private final CombinableArbitrary combinableArbitrary;
 	private final Predicate<Object> predicate;
 
-	public FilteredCombinableArbitrary(CombinableArbitrary combinableArbitrary, Predicate<Object> predicate) {
+	public FilteredCombinableArbitrary(
+		int maxMisses,
+		CombinableArbitrary combinableArbitrary,
+		Predicate<Object> predicate
+	) {
+		this.maxMisses = maxMisses;
 		this.combinableArbitrary = combinableArbitrary;
 		this.predicate = predicate;
 	}
 
 	@Override
-	public Arbitrary<Object> combined() {
-		return combinableArbitrary.combined().filter(predicate);
+	public Object combined() {
+		Object returned;
+		for (int i = 0; i < maxMisses; i++) {
+			try {
+				returned = combinableArbitrary.combined();
+				if (predicate.test(returned)) {
+					return returned;
+				}
+			} catch (TooManyFilterMissesException | ConstraintViolationException
+				| jakarta.validation.ConstraintViolationException e) {
+				// omitted
+			} finally {
+				combinableArbitrary.clear();
+			}
+		}
+
+		throw new TooManyFilterMissesException("");
 	}
 
 	@Override
-	public Arbitrary<Object> rawValue() {
-		return combinableArbitrary.rawValue().filter(predicate);
+	public Object rawValue() {
+		Object returned;
+		for (int i = 0; i < maxMisses; i++) {
+			try {
+				returned = combinableArbitrary.rawValue();
+				if (predicate.test(returned)) {
+					return returned;
+				}
+			} catch (TooManyFilterMissesException | ConstraintViolationException
+				| jakarta.validation.ConstraintViolationException e) {
+				// omitted
+			} finally {
+				combinableArbitrary.clear();
+			}
+		}
+
+		throw new TooManyFilterMissesException("");
 	}
 
 	@Override
-	public CombinableArbitrary filter(Predicate<Object> predicate) {
-		return new FilteredCombinableArbitrary(this, predicate);
+	public void clear() {
+		combinableArbitrary.clear();
 	}
 
 	@Override
-	public CombinableArbitrary map(Function<Object, Object> mapper) {
-		return new MappedCombinableArbitrary(this, mapper);
-	}
-
-	@Override
-	public CombinableArbitrary injectNull(double nullProbability) {
-		return new NullInjectCombinableArbitrary(this, nullProbability);
+	public boolean fixed() {
+		return combinableArbitrary.fixed();
 	}
 }

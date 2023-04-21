@@ -19,45 +19,35 @@
 package com.navercorp.fixturemonkey.api.generator;
 
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
-import net.jqwik.api.Arbitrary;
-
 @API(since = "0.5.0", status = Status.EXPERIMENTAL)
 public final class FixedCombinableArbitrary implements CombinableArbitrary {
-	private final Arbitrary<Object> arbitrary;
+	private final Object lazyValue;
 
-	public FixedCombinableArbitrary(Arbitrary<Object> arbitrary) {
-		this.arbitrary = arbitrary;
+	public FixedCombinableArbitrary(Object lazyValue) {
+		this.lazyValue = lazyValue;
 	}
 
 	@Override
-	public Arbitrary<Object> combined() {
-		return arbitrary;
+	public Object combined() {
+		return lazyValue;
 	}
 
 	@Override
-	public Arbitrary<Object> rawValue() {
-		return arbitrary;
+	public Object rawValue() {
+		return lazyValue;
 	}
 
 	@Override
-	public CombinableArbitrary filter(Predicate<Object> predicate) {
-		return new FilteredCombinableArbitrary(this, predicate);
+	public void clear() {
 	}
 
 	@Override
-	public CombinableArbitrary map(Function<Object, Object> mapper) {
-		return new MappedCombinableArbitrary(this, mapper);
-	}
-
-	@Override
-	public CombinableArbitrary injectNull(double nullProbability) {
-		return new NullInjectCombinableArbitrary(this, nullProbability);
+	public boolean fixed() {
+		return true;
 	}
 
 	@Override
@@ -69,11 +59,11 @@ public final class FixedCombinableArbitrary implements CombinableArbitrary {
 			return false;
 		}
 		FixedCombinableArbitrary that = (FixedCombinableArbitrary)obj;
-		return Objects.equals(arbitrary, that.arbitrary);
+		return Objects.equals(lazyValue, that.lazyValue);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(arbitrary);
+		return Objects.hash(lazyValue);
 	}
 }

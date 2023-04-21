@@ -25,15 +25,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
-
-import net.jqwik.api.Arbitraries;
-import net.jqwik.api.Builders;
-import net.jqwik.api.Builders.BuilderCombinator;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -43,12 +38,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.navercorp.fixturemonkey.api.generator.ArbitraryGeneratorContext;
-import com.navercorp.fixturemonkey.api.generator.ArbitraryProperty;
-import com.navercorp.fixturemonkey.api.generator.CombinableArbitrary;
-import com.navercorp.fixturemonkey.api.generator.FixedCombinableArbitrary;
+import com.navercorp.fixturemonkey.api.generator.ObjectCombinableArbitrary;
 import com.navercorp.fixturemonkey.api.introspector.ArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.introspector.ArbitraryIntrospectorResult;
-import com.navercorp.fixturemonkey.api.lazy.LazyArbitrary;
 import com.navercorp.fixturemonkey.api.property.Property;
 import com.navercorp.fixturemonkey.api.type.Types;
 import com.navercorp.fixturemonkey.jackson.FixtureMonkeyJackson;
@@ -71,56 +63,45 @@ public final class JacksonObjectArbitraryIntrospector implements ArbitraryIntros
 		Property property = context.getResolvedProperty();
 		Class<?> type = Types.getActualType(property.getType());
 
-		List<ArbitraryProperty> childrenProperties = context.getChildren();
-		Map<String, CombinableArbitrary> arbitrariesByResolvedName =
-			context.getCombinableArbitrariesByResolvedName();
-
 		return new ArbitraryIntrospectorResult(
-			new JacksonCombinableArbitrary<>(
-				LazyArbitrary.lazy(
-					() -> {
-						BuilderCombinator<Map<String, Object>> builderCombinator = Builders.withBuilder(
-							() -> initializeMap(property)
-						);
+			new JacksonCombinableArbitrary(
+				new ObjectCombinableArbitrary(
+					context.getCombinableArbitrariesByArbitraryProperty(),
+					propertyValuesByArbitraryProperty -> {
+						Map<String, Object> map = initializeMap(property);
 
-						for (ArbitraryProperty arbitraryProperty : childrenProperties) {
-							String resolvePropertyName = arbitraryProperty.getObjectProperty()
-								.getResolvedPropertyName();
-							CombinableArbitrary combinableArbitrary = arbitrariesByResolvedName.getOrDefault(
-								resolvePropertyName,
-								new FixedCombinableArbitrary(Arbitraries.just(null)
-								)
-							);
-							builderCombinator = builderCombinator.use(combinableArbitrary.rawValue())
-								.in((map, value) -> {
-									if (value != null) {
-										Object jsonFormatted = arbitraryProperty.getObjectProperty()
-											.getProperty()
-											.getAnnotation(JsonFormat.class)
-											.map(it -> format(value, it))
-											.orElse(value);
+						propertyValuesByArbitraryProperty.forEach(
+							((arbitraryProperty, value) -> {
+								String resolvePropertyName = arbitraryProperty.getObjectProperty()
+									.getResolvedPropertyName();
 
-										JsonTypeInfo jsonTypeInfo = getJacksonAnnotation(property, JsonTypeInfo.class);
-										if (jsonTypeInfo == null) {
-											map.put(resolvePropertyName, jsonFormatted);
-										} else {
-											if (jsonTypeInfo.include() == As.WRAPPER_OBJECT) {
-												String typeIdentifier = getJsonTypeInfoIdentifier(
-													jsonTypeInfo,
-													property
-												);
+								if (value != null) {
+									Object jsonFormatted = arbitraryProperty.getObjectProperty()
+										.getProperty()
+										.getAnnotation(JsonFormat.class)
+										.map(it -> format(value, it))
+										.orElse(value);
 
-												Map<String, Object> typeJson = (Map<String, Object>)
-													map.getOrDefault(typeIdentifier, new HashMap<>());
-												typeJson.put(resolvePropertyName, jsonFormatted);
-												map.put(typeIdentifier, typeJson);
-											}
+									JsonTypeInfo jsonTypeInfo = getJacksonAnnotation(property, JsonTypeInfo.class);
+									if (jsonTypeInfo == null) {
+										map.put(resolvePropertyName, jsonFormatted);
+									} else {
+										if (jsonTypeInfo.include() == As.WRAPPER_OBJECT) {
+											String typeIdentifier = getJsonTypeInfoIdentifier(
+												jsonTypeInfo,
+												property
+											);
+
+											Map<String, Object> typeJson = (Map<String, Object>)
+												map.getOrDefault(typeIdentifier, new HashMap<>());
+											typeJson.put(resolvePropertyName, jsonFormatted);
+											map.put(typeIdentifier, typeJson);
 										}
 									}
-									return map;
-								});
-						}
-						return builderCombinator.build();
+								}
+								return map;
+							})
+						);
 					}
 				),
 				map -> objectMapper.convertValue(map, type)

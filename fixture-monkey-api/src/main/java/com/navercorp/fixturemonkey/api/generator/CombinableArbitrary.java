@@ -24,19 +24,19 @@ import java.util.function.Predicate;
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
-import net.jqwik.api.Arbitrary;
-
 /**
  * An arbitrary instance for combining arbitraries in order to generate an instance of specific class.
  */
 @API(since = "0.6.0", status = Status.EXPERIMENTAL)
 public interface CombinableArbitrary {
+	int MAX_TRIES = 1_000;
+
 	/**
 	 * Retrieves a combined arbitrary.
 	 *
 	 * @return a combined arbitrary
 	 */
-	Arbitrary<Object> combined();
+	Object combined();
 
 	/**
 	 * Retrieves an arbitrary to combine.
@@ -45,11 +45,31 @@ public interface CombinableArbitrary {
 	 *
 	 * @return an arbitrary to combine
 	 */
-	Arbitrary<Object> rawValue();
+	Object rawValue();
 
-	CombinableArbitrary filter(Predicate<Object> predicate);
+	default CombinableArbitrary filter(Predicate<Object> predicate) {
+		return new FilteredCombinableArbitrary(
+			MAX_TRIES,
+			this,
+			predicate
+		);
+	}
 
-	CombinableArbitrary map(Function<Object, Object> mapper);
+	default CombinableArbitrary map(Function<Object, Object> mapper) {
+		return new MappedCombinableArbitrary(
+			this,
+			mapper
+		);
+	}
 
-	CombinableArbitrary injectNull(double nullProbability);
+	default CombinableArbitrary injectNull(double nullProbability) {
+		return new NullInjectCombinableArbitrary(
+			this,
+			nullProbability
+		);
+	}
+
+	void clear();
+
+	boolean fixed();
 }

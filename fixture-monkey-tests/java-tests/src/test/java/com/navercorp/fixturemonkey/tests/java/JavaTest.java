@@ -27,7 +27,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
+import com.navercorp.fixturemonkey.ArbitraryBuilder;
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.type.TypeReference;
@@ -111,11 +113,13 @@ class JavaTest {
 
 	@RepeatedTest(TEST_COUNT)
 	void fixedGenericImplementationObject() {
-		String actual = SUT.giveMeBuilder(new TypeReference<GenericImplementationObject<String>>() {
-			})
+		GenericImplementationObject<String> builder = SUT.giveMeBuilder(
+				new TypeReference<GenericImplementationObject<String>>() {
+				})
 			.fixed()
-			.sample()
-			.getValue();
+			.sample();
+
+		String actual = builder.getValue();
 
 		then(actual).isNotNull();
 	}
@@ -325,5 +329,25 @@ class JavaTest {
 			.sample();
 
 		then(actual).isNotNull();
+	}
+
+	@Test
+	void sampleUniqueSet() {
+		Set<String> actual = SUT.giveMeBuilder(new TypeReference<Set<String>>() {
+			})
+			.size("$", 200)
+			.sample();
+
+		then(actual).hasSize(200);
+	}
+
+	@Test
+	void sampleJavaTypeReturnsDiff() {
+		ArbitraryBuilder<String> builder = SUT.giveMeBuilder(String.class);
+
+		String actual = builder.sample();
+
+		String notExpected = builder.sample();
+		then(actual).isNotEqualTo(notExpected);
 	}
 }

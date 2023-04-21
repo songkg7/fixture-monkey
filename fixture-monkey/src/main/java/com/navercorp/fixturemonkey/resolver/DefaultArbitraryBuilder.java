@@ -25,6 +25,8 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -34,10 +36,13 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
+import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
 import net.jqwik.api.Combinators.F3;
 import net.jqwik.api.Combinators.F4;
@@ -71,6 +76,10 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T> {
 	private final ArbitraryValidator validator;
 	private final MonkeyManipulatorFactory monkeyManipulatorFactory;
 	private final ArbitraryBuilderContext context;
+
+	@SuppressWarnings("rawtypes")
+	private final Map<String, ConstraintViolation> violations = new ConcurrentHashMap<>();
+	private Exception lastException;
 
 	public DefaultArbitraryBuilder(
 		ManipulateOptions manipulateOptions,
@@ -406,21 +415,19 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T> {
 	public Arbitrary<T> build() {
 		List<ArbitraryManipulator> buildManipulators = new ArrayList<>(this.context.getManipulators());
 
-		return new ArbitraryValue<>(
-			() -> (Arbitrary<T>)this.resolver.resolve(
+		return Arbitraries.ofSuppliers(
+			() -> (T)this.resolver.resolve(
 				this.rootProperty,
 				buildManipulators,
 				context.getCustomizers(),
 				context.getContainerInfoManipulators()
-			),
-			this.validator,
-			context.isValidOnly()
+			).filter(this.validateFilter(context.isValidOnly())).combined()
 		);
 	}
 
 	@Override
 	public T sample() {
-		return this.build().sample();
+		return build().sample();
 	}
 
 	@Override
@@ -472,5 +479,32 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T> {
 			monkeyManipulatorFactory,
 			context
 		);
+	}
+
+	@SuppressWarnings("rawtypes")
+	private Predicate validateFilter(boolean validOnly) {
+		return fixture -> {
+			if (!validOnly) {
+				return true;
+			}
+
+			if (fixture == null) {
+				return true;
+			}
+
+			try {
+				this.validator.validate(fixture);
+				return true;
+			} catch (ConstraintViolationException ex) {
+				ex.getConstraintViolations().forEach(violation ->
+					this.violations.put(
+						violation.getRootBeanClass().getName() + violation.getPropertyPath(),
+						violation
+					)
+				);
+				this.lastException = ex;
+			}
+			return false;
+		};
 	}
 }

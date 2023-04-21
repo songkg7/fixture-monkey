@@ -30,9 +30,6 @@ import javax.annotation.Nullable;
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
-import net.jqwik.api.Arbitraries;
-import net.jqwik.api.Arbitrary;
-
 import com.navercorp.fixturemonkey.api.context.MonkeyContext;
 import com.navercorp.fixturemonkey.api.context.MonkeyGeneratorContext;
 import com.navercorp.fixturemonkey.api.customizer.FixtureCustomizer;
@@ -40,6 +37,8 @@ import com.navercorp.fixturemonkey.api.generator.ArbitraryGeneratorContext;
 import com.navercorp.fixturemonkey.api.generator.ArbitraryProperty;
 import com.navercorp.fixturemonkey.api.generator.CombinableArbitrary;
 import com.navercorp.fixturemonkey.api.generator.FixedCombinableArbitrary;
+import com.navercorp.fixturemonkey.api.generator.LazyCombinableArbitrary;
+import com.navercorp.fixturemonkey.api.lazy.LazyArbitrary;
 import com.navercorp.fixturemonkey.api.matcher.MatcherOperator;
 import com.navercorp.fixturemonkey.api.option.GenerateOptions;
 import com.navercorp.fixturemonkey.api.property.Property;
@@ -85,9 +84,9 @@ public final class ObjectTree {
 		}
 	}
 
-	public Arbitrary<?> generate() {
+	public CombinableArbitrary generate() {
 		ArbitraryGeneratorContext context = generateContext(rootNode, customizers, null);
-		return generateIntrospected(context, rootNode).combined();
+		return generateIntrospected(context, rootNode);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -122,7 +121,7 @@ public final class ObjectTree {
 			(ctx, prop) -> {
 				ObjectNode node = childNodesByArbitraryProperty.get(prop);
 				if (node == null) {
-					return new FixedCombinableArbitrary(Arbitraries.just(null));
+					return new FixedCombinableArbitrary(null);
 				}
 
 				return generateIntrospected(ctx, node);
@@ -137,13 +136,13 @@ public final class ObjectTree {
 		ArbitraryGeneratorContext ctx,
 		ObjectNode node
 	) {
-		ArbitraryProperty prop = node.getArbitraryProperty();
-
 		CombinableArbitrary generated;
 		if (node.getArbitrary() != null) {
-			generated = new FixedCombinableArbitrary(
-				(Arbitrary<Object>)node.getArbitrary() // fixed
+			generated = new LazyCombinableArbitrary(LazyArbitrary.lazy(
+				() -> node.getArbitrary() // fixed
 					.injectNull(node.getArbitraryProperty().getObjectProperty().getNullInject())
+					.sample()
+			)
 			);
 		} else {
 			ArbitraryGeneratorContext childArbitraryGeneratorContext = this.generateContext(node, customizers, ctx);
@@ -182,7 +181,7 @@ public final class ObjectTree {
 		CombinableArbitrary arbitrary = generated;
 		if (customizer != null) {
 			arbitrary = new FixedCombinableArbitrary(
-				generated.combined().map(obj -> customizer.customizeFixture(obj))
+				generated.map(obj -> customizer.customizeFixture(obj)).combined()
 			);
 		}
 

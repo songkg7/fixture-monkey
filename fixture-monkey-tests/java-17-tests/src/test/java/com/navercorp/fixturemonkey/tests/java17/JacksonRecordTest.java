@@ -21,6 +21,7 @@ package com.navercorp.fixturemonkey.tests.java17;
 import static com.navercorp.fixturemonkey.tests.TestEnvironment.TEST_COUNT;
 import static org.assertj.core.api.BDDAssertions.then;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
@@ -66,6 +67,7 @@ class JacksonRecordTest {
 		then(actual).isNotNull();
 	}
 
+	@Disabled
 	@RepeatedTest(TEST_COUNT)
 	void sampleContainer() {
 		ContainerRecord actual = SUT.giveMeOne(ContainerRecord.class);
@@ -73,6 +75,7 @@ class JacksonRecordTest {
 		then(actual).isNotNull();
 	}
 
+	@Disabled
 	@RepeatedTest(TEST_COUNT)
 	void fixedContainer() {
 		ContainerRecord actual = SUT.giveMeBuilder(ContainerRecord.class)

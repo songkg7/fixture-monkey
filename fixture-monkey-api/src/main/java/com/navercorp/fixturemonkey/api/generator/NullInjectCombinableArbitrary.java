@@ -18,13 +18,12 @@
 
 package com.navercorp.fixturemonkey.api.generator;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.lang.reflect.Proxy;
 
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
-import net.jqwik.api.Arbitrary;
+import net.jqwik.api.Arbitraries;
 
 @API(since = "0.5.0", status = Status.EXPERIMENTAL)
 public final class NullInjectCombinableArbitrary implements CombinableArbitrary {
@@ -37,27 +36,32 @@ public final class NullInjectCombinableArbitrary implements CombinableArbitrary 
 	}
 
 	@Override
-	public Arbitrary<Object> combined() {
-		return combinableArbitrary.combined().injectNull(nullProbability);
+	public Object combined() {
+		// TODO: remove Arbitrary dependency
+		Object combined = combinableArbitrary.combined();
+		if (combined instanceof Proxy) {
+			return combined;
+		}
+		return Arbitraries.just(combined).injectNull(nullProbability).sample();
 	}
 
 	@Override
-	public Arbitrary<Object> rawValue() {
-		return combinableArbitrary.rawValue().injectNull(nullProbability);
+	public Object rawValue() {
+		// TODO: remove Arbitrary dependency
+		Object rawValue = combinableArbitrary.rawValue();
+		if (rawValue instanceof Proxy) {
+			return rawValue;
+		}
+		return Arbitraries.just(rawValue).injectNull(nullProbability).sample();
 	}
 
 	@Override
-	public CombinableArbitrary filter(Predicate<Object> predicate) {
-		return new FilteredCombinableArbitrary(this, predicate);
+	public void clear() {
+		combinableArbitrary.clear();
 	}
 
 	@Override
-	public CombinableArbitrary map(Function<Object, Object> mapper) {
-		return new MappedCombinableArbitrary(this, mapper);
-	}
-
-	@Override
-	public CombinableArbitrary injectNull(double nullProbability) {
-		return new NullInjectCombinableArbitrary(this, nullProbability);
+	public boolean fixed() {
+		return combinableArbitrary.fixed();
 	}
 }

@@ -29,6 +29,7 @@ import java.time.OffsetTime;
 import java.time.Period;
 import java.time.Year;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
@@ -134,7 +135,7 @@ public final class JakartaValidationJavaTimeArbitraryResolver implements JavaTim
 			instantArbitrary = instantArbitrary.atTheLatest(max.atZone(ZoneOffset.systemDefault()).toInstant());
 		}
 
-		return instantArbitrary;
+		return instantArbitrary.map(it -> it.atZone(ZoneOffset.systemDefault()).toInstant());
 	}
 
 	@Override
@@ -212,7 +213,7 @@ public final class JakartaValidationJavaTimeArbitraryResolver implements JavaTim
 			zonedDateTimeArbitrary = zonedDateTimeArbitrary.atTheLatest(max);
 		}
 
-		return zonedDateTimeArbitrary;
+		return zonedDateTimeArbitrary.map(it -> it.withZoneSameLocal(ZoneId.systemDefault()));
 	}
 
 	@Override
@@ -251,7 +252,8 @@ public final class JakartaValidationJavaTimeArbitraryResolver implements JavaTim
 			offsetDateTimeArbitrary = offsetDateTimeArbitrary.atTheLatest(max);
 		}
 
-		return offsetDateTimeArbitrary;
+		ZoneOffset offset = OffsetDateTime.now(ZoneOffset.systemDefault()).getOffset();
+		return offsetDateTimeArbitrary.offsetBetween(offset, offset);
 	}
 
 	@Override
@@ -270,7 +272,8 @@ public final class JakartaValidationJavaTimeArbitraryResolver implements JavaTim
 			offsetTimeArbitrary = offsetTimeArbitrary.atTheLatest(max);
 		}
 
-		return offsetTimeArbitrary;
+		ZoneOffset offset = OffsetDateTime.now(ZoneOffset.systemDefault()).getOffset();
+		return offsetTimeArbitrary.map(it -> it.withOffsetSameLocal(offset));
 	}
 
 	@Override

@@ -212,7 +212,9 @@ public final class JavaxValidationJavaTimeArbitraryResolver implements JavaTimeA
 			zonedDateTimeArbitrary = zonedDateTimeArbitrary.atTheLatest(max);
 		}
 
-		return zonedDateTimeArbitrary;
+		return zonedDateTimeArbitrary.map(it ->
+			ZonedDateTime.ofInstant(it.toInstant(), ZoneOffset.systemDefault())
+		);
 	}
 
 	@Override
@@ -251,7 +253,7 @@ public final class JavaxValidationJavaTimeArbitraryResolver implements JavaTimeA
 			offsetDateTimeArbitrary = offsetDateTimeArbitrary.atTheLatest(max);
 		}
 
-		return offsetDateTimeArbitrary;
+		return offsetDateTimeArbitrary.map(it -> it.atZoneSameInstant(ZoneOffset.systemDefault()).toOffsetDateTime());
 	}
 
 	@Override
@@ -270,7 +272,8 @@ public final class JavaxValidationJavaTimeArbitraryResolver implements JavaTimeA
 			offsetTimeArbitrary = offsetTimeArbitrary.atTheLatest(max);
 		}
 
-		return offsetTimeArbitrary;
+		ZoneOffset offset = OffsetDateTime.now(ZoneOffset.systemDefault()).getOffset();
+		return offsetTimeArbitrary.offsetBetween(offset, offset);
 	}
 
 	@Override

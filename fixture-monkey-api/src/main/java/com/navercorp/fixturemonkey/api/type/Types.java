@@ -570,4 +570,11 @@ public class Types {
 		}
 		return Optional.empty();
 	}
+
+	public static <T> T nullSafe(T obj) {
+		if (obj == null) {
+			throw new IllegalArgumentException("This object should not be null.");
+		}
+		return obj;
+	}
 }
