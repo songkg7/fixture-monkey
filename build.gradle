@@ -30,8 +30,8 @@ allprojects {
         mavenCentral()
     }
 
-    group = "com.navercorp.fixturemonkey"
-    version = "0.5.6-SNAPSHOT"
+    group = "com.navercorp.fixturemonkey.snapshot"
+    version = "0.5.6-6c1456cc"
 }
 
 subprojects {
