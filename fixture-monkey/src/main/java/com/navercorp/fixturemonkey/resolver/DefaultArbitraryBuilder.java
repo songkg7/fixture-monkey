@@ -421,7 +421,9 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T> {
 				buildManipulators,
 				context.getCustomizers(),
 				context.getContainerInfoManipulators()
-			).filter(this.validateFilter(context.isValidOnly())).combined()
+			)
+				.filter(this.validateFilter(context.isValidOnly()))
+				.combined()
 		);
 	}
 

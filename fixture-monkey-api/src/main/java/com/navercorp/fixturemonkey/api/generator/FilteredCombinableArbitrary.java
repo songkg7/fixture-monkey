@@ -52,8 +52,7 @@ public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 				if (predicate.test(returned)) {
 					return returned;
 				}
-			} catch (TooManyFilterMissesException | ConstraintViolationException
-				| jakarta.validation.ConstraintViolationException e) {
+			} catch (TooManyFilterMissesException | ConstraintViolationException e) { // TODO:jakarta
 				// omitted
 			} finally {
 				combinableArbitrary.clear();
@@ -72,8 +71,7 @@ public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 				if (predicate.test(returned)) {
 					return returned;
 				}
-			} catch (TooManyFilterMissesException | ConstraintViolationException
-				| jakarta.validation.ConstraintViolationException e) {
+			} catch (TooManyFilterMissesException | ConstraintViolationException e) { // TODO:jakarta
 				// omitted
 			} finally {
 				combinableArbitrary.clear();

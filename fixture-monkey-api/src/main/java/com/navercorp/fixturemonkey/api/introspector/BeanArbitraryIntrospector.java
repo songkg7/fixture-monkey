@@ -56,32 +56,32 @@ public final class BeanArbitraryIntrospector implements ArbitraryIntrospector {
 			property.getAnnotatedType()
 		);
 
-		CombinableArbitrary combinableArbitrary = new ObjectCombinableArbitrary(
-			arbitrariesByArbitraryProperty,
-			propertyValuesByArbitraryProperty -> {
-				Object instance = Reflections.newInstance(type);
-				propertyValuesByArbitraryProperty.forEach(
-					(arbitraryProperty, value) -> {
-						String originPropertyName = arbitraryProperty.getObjectProperty().getProperty().getName();
-						PropertyDescriptor propertyDescriptor = propertyDescriptors.get(originPropertyName);
-						Method writeMethod = propertyDescriptor.getWriteMethod();
-						try {
-							if (value != null) {
-								writeMethod.invoke(instance, value);
+		return new ArbitraryIntrospectorResult(
+			new ObjectCombinableArbitrary(
+				arbitrariesByArbitraryProperty,
+				propertyValuesByArbitraryProperty -> {
+					Object instance = Reflections.newInstance(type);
+					propertyValuesByArbitraryProperty.forEach(
+						(arbitraryProperty, value) -> {
+							String originPropertyName = arbitraryProperty.getObjectProperty().getProperty().getName();
+							PropertyDescriptor propertyDescriptor = propertyDescriptors.get(originPropertyName);
+							Method writeMethod = propertyDescriptor.getWriteMethod();
+							try {
+								if (value != null) {
+									writeMethod.invoke(instance, value);
+								}
+							} catch (Exception e) {
+								log.warn("set bean property is failed. name: {} value: {}",
+									writeMethod.getName(),
+									value,
+									e);
 							}
-						} catch (Exception e) {
-							log.warn("set bean property is failed. name: {} value: {}",
-								writeMethod.getName(),
-								value,
-								e);
+
 						}
-
-					}
-				);
-				return instance;
-			}
+					);
+					return instance;
+				}
+			)
 		);
-
-		return new ArbitraryIntrospectorResult(combinableArbitrary);
 	}
 }

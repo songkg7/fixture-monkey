@@ -33,12 +33,16 @@ public final class LazyCombinableArbitrary implements CombinableArbitrary {
 
 	@Override
 	public Object combined() {
-		return introspected.getValue();
+		Object combined = introspected.getValue();
+		introspected.clear();
+		return combined;
 	}
 
 	@Override
 	public Object rawValue() {
-		return introspected.getValue();
+		Object rawValue = introspected.getValue();
+		introspected.clear();
+		return rawValue;
 	}
 
 	@Override
