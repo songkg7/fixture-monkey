@@ -99,9 +99,9 @@ public final class JacksonObjectArbitraryIntrospector implements ArbitraryIntros
 										}
 									}
 								}
-								return map;
 							})
 						);
+						return map;
 					}
 				),
 				map -> objectMapper.convertValue(map, type)

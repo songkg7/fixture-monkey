@@ -21,22 +21,23 @@ package com.navercorp.fixturemonkey.javax.validation.validator;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
 import com.navercorp.fixturemonkey.api.validator.ArbitraryValidator;
+import com.navercorp.fixturemonkey.api.validator.ValidationFailedException;
 
 @API(since = "0.5.6", status = Status.EXPERIMENTAL)
 public final class JavaxArbitraryValidator implements ArbitraryValidator {
 	private Validator validator;
 
 	public JavaxArbitraryValidator() {
-		try {
-			this.validator = Validation.buildDefaultValidatorFactory().getValidator();
+		try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+			this.validator = factory.getValidator();
 		} catch (Exception e) {
 			this.validator = null;
 		}
@@ -47,8 +48,8 @@ public final class JavaxArbitraryValidator implements ArbitraryValidator {
 		if (this.validator != null) {
 			Set<ConstraintViolation<Object>> violations = this.validator.validate(arbitrary);
 			if (!violations.isEmpty()) {
-				throw new ConstraintViolationException(
-					"DefaultArbitrayValidator ConstraintViolations. type: " + arbitrary.getClass(), violations);
+				throw new ValidationFailedException(
+					"DefaultArbitraryValidator ConstraintViolations. type: " + arbitrary.getClass(), violations);
 			}
 		}
 	}

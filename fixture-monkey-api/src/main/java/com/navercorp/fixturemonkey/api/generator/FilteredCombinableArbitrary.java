@@ -20,12 +20,12 @@ package com.navercorp.fixturemonkey.api.generator;
 
 import java.util.function.Predicate;
 
-import javax.validation.ConstraintViolationException;
-
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
 import net.jqwik.api.TooManyFilterMissesException;
+
+import com.navercorp.fixturemonkey.api.validator.ValidationFailedException;
 
 @API(since = "0.5.0", status = Status.EXPERIMENTAL)
 public final class FilteredCombinableArbitrary implements CombinableArbitrary {
@@ -52,7 +52,7 @@ public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 				if (predicate.test(returned)) {
 					return returned;
 				}
-			} catch (TooManyFilterMissesException | ConstraintViolationException e) { // TODO:jakarta
+			} catch (TooManyFilterMissesException | ValidationFailedException ex) {
 				// omitted
 			} finally {
 				combinableArbitrary.clear();
@@ -71,7 +71,7 @@ public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 				if (predicate.test(returned)) {
 					return returned;
 				}
-			} catch (TooManyFilterMissesException | ConstraintViolationException e) { // TODO:jakarta
+			} catch (TooManyFilterMissesException | ValidationFailedException ex) {
 				// omitted
 			} finally {
 				combinableArbitrary.clear();

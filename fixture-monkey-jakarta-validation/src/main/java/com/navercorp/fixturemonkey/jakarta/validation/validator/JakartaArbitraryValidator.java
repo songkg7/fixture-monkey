@@ -24,19 +24,20 @@ import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 
 import com.navercorp.fixturemonkey.api.validator.ArbitraryValidator;
+import com.navercorp.fixturemonkey.api.validator.ValidationFailedException;
 
 @API(since = "0.5.6", status = Status.EXPERIMENTAL)
 public final class JakartaArbitraryValidator implements ArbitraryValidator {
 	private Validator validator;
 
 	public JakartaArbitraryValidator() {
-		try {
-			this.validator = Validation.buildDefaultValidatorFactory().getValidator();
+		try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+			this.validator = factory.getValidator();
 		} catch (Exception e) {
 			this.validator = null;
 		}
@@ -47,8 +48,8 @@ public final class JakartaArbitraryValidator implements ArbitraryValidator {
 		if (this.validator != null) {
 			Set<ConstraintViolation<Object>> violations = this.validator.validate(arbitrary);
 			if (!violations.isEmpty()) {
-				throw new ConstraintViolationException(
-					"DefaultArbitrayValidator ConstraintViolations. type: " + arbitrary.getClass(), violations);
+				throw new ValidationFailedException(
+					"DefaultArbitraryValidator ConstraintViolations. type: " + arbitrary.getClass(), violations);
 			}
 		}
 	}
