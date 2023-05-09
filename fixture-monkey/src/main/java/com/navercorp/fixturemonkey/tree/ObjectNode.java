@@ -72,7 +72,7 @@ public final class ObjectNode {
 
 	public void setChildren(List<ObjectNode> children) {
 		this.children = children;
-		for (ObjectNode child : children) {
+		for (ObjectNode child : this.children) {
 			child.parent = this;
 		}
 	}
@@ -96,10 +96,6 @@ public final class ObjectNode {
 
 	public List<ObjectNode> getChildren() {
 		return this.children;
-	}
-
-	public ObjectNode getParent() {
-		return parent;
 	}
 
 	@Nullable
@@ -134,5 +130,10 @@ public final class ObjectNode {
 
 	public void setManipulated(boolean manipulated) {
 		this.manipulated = manipulated;
+	}
+
+	@Nullable
+	public ObjectNode getParent() {
+		return parent;
 	}
 }
