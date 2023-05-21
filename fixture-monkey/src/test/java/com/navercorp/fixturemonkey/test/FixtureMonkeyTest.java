@@ -56,7 +56,6 @@ import com.navercorp.fixturemonkey.api.generator.ChildArbitraryContext;
 import com.navercorp.fixturemonkey.api.matcher.ExactTypeMatcher;
 import com.navercorp.fixturemonkey.api.matcher.MatcherOperator;
 import com.navercorp.fixturemonkey.api.type.TypeReference;
-import com.navercorp.fixturemonkey.api.validator.EnumContainerBiggerThanEnumSizeException;
 import com.navercorp.fixturemonkey.customizer.Values;
 import com.navercorp.fixturemonkey.test.ExpressionGeneratorTestSpecs.StringValue;
 import com.navercorp.fixturemonkey.test.FixtureMonkeyTestSpecs.ChildValue;
@@ -1508,7 +1507,7 @@ class FixtureMonkeyTest {
 				})
 				.size("$", 3)
 				.sample()
-		).isExactlyInstanceOf(EnumContainerBiggerThanEnumSizeException.class);
+		).isExactlyInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Property
@@ -1518,7 +1517,7 @@ class FixtureMonkeyTest {
 				})
 				.size("$", 3)
 				.sample()
-		).isExactlyInstanceOf(EnumContainerBiggerThanEnumSizeException.class);
+		).isExactlyInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Property

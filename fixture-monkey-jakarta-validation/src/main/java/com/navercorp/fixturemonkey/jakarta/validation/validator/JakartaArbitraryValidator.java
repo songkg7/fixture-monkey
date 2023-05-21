@@ -28,8 +28,8 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
+import com.navercorp.fixturemonkey.api.exception.ValidationFailedException;
 import com.navercorp.fixturemonkey.api.validator.ArbitraryValidator;
-import com.navercorp.fixturemonkey.api.validator.ValidationFailedException;
 
 @API(since = "0.5.6", status = Status.EXPERIMENTAL)
 public final class JakartaArbitraryValidator implements ArbitraryValidator {

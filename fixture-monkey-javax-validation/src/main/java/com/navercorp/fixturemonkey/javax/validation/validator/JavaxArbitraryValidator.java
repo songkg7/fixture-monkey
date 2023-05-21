@@ -28,8 +28,8 @@ import javax.validation.ValidatorFactory;
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
+import com.navercorp.fixturemonkey.api.exception.ValidationFailedException;
 import com.navercorp.fixturemonkey.api.validator.ArbitraryValidator;
-import com.navercorp.fixturemonkey.api.validator.ValidationFailedException;
 
 @API(since = "0.5.6", status = Status.EXPERIMENTAL)
 public final class JavaxArbitraryValidator implements ArbitraryValidator {

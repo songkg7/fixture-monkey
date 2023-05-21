@@ -25,13 +25,15 @@ import org.apiguardian.api.API.Status;
 
 import net.jqwik.api.TooManyFilterMissesException;
 
-import com.navercorp.fixturemonkey.api.validator.ValidationFailedException;
+import com.navercorp.fixturemonkey.api.exception.FilterMissException;
+import com.navercorp.fixturemonkey.api.exception.ValidationFailedException;
 
 @API(since = "0.5.0", status = Status.EXPERIMENTAL)
 public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 	private final int maxMisses;
 	private final CombinableArbitrary combinableArbitrary;
 	private final Predicate<Object> predicate;
+	private Exception lastException;
 
 	public FilteredCombinableArbitrary(
 		int maxMisses,
@@ -52,14 +54,14 @@ public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 				if (predicate.test(returned)) {
 					return returned;
 				}
-			} catch (TooManyFilterMissesException | ValidationFailedException ex) {
-				// omitted
+			} catch (TooManyFilterMissesException | ValidationFailedException | FilterMissException ex) {
+				lastException = ex;
 			} finally {
 				combinableArbitrary.clear();
 			}
 		}
 
-		throw new TooManyFilterMissesException("");
+		throw new FilterMissException(lastException);
 	}
 
 	@Override
@@ -71,14 +73,14 @@ public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 				if (predicate.test(returned)) {
 					return returned;
 				}
-			} catch (TooManyFilterMissesException | ValidationFailedException ex) {
-				// omitted
+			} catch (TooManyFilterMissesException | ValidationFailedException | FilterMissException ex) {
+				lastException = ex;
 			} finally {
 				combinableArbitrary.clear();
 			}
 		}
 
-		throw new TooManyFilterMissesException("");
+		throw new FilterMissException(lastException);
 	}
 
 	@Override
