@@ -23,7 +23,7 @@ import java.lang.reflect.Proxy;
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
-import net.jqwik.api.Arbitraries;
+import com.navercorp.fixturemonkey.api.random.Randoms;
 
 @API(since = "0.5.0", status = Status.EXPERIMENTAL)
 public final class NullInjectCombinableArbitrary implements CombinableArbitrary {
@@ -37,22 +37,22 @@ public final class NullInjectCombinableArbitrary implements CombinableArbitrary 
 
 	@Override
 	public Object combined() {
-		// TODO: remove Arbitrary dependency
 		Object combined = combinableArbitrary.combined();
 		if (combined instanceof Proxy) {
 			return combined;
 		}
-		return Arbitraries.just(combined).injectNull(nullProbability).sample();
+
+		return injectNull(combined);
 	}
 
 	@Override
 	public Object rawValue() {
-		// TODO: remove Arbitrary dependency
 		Object rawValue = combinableArbitrary.rawValue();
 		if (rawValue instanceof Proxy) {
 			return rawValue;
 		}
-		return Arbitraries.just(rawValue).injectNull(nullProbability).sample();
+
+		return injectNull(rawValue);
 	}
 
 	@Override
@@ -63,5 +63,14 @@ public final class NullInjectCombinableArbitrary implements CombinableArbitrary 
 	@Override
 	public boolean fixed() {
 		return combinableArbitrary.fixed();
+	}
+
+	private Object injectNull(Object object) {
+		int frequencyNull = (int)Math.round(nullProbability * 1000);
+		if (frequencyNull <= 0) {
+			return object;
+		}
+		int currentSeed = Randoms.nextInt(1000);
+		return currentSeed < frequencyNull ? null : object;
 	}
 }
