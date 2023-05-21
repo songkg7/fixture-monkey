@@ -38,7 +38,6 @@ import com.navercorp.fixturemonkey.api.property.Property;
 @API(since = "0.4.0", status = Status.MAINTAINED)
 public final class SetIntrospector implements ArbitraryIntrospector, Matcher {
 	private static final Matcher MATCHER = new AssignableTypeMatcher(Set.class);
-	private static final int MAX_TRIES = 10000;
 
 	@Override
 	public boolean match(Property property) {
@@ -60,11 +59,11 @@ public final class SetIntrospector implements ArbitraryIntrospector, Matcher {
 			return ArbitraryIntrospectorResult.EMPTY;
 		}
 
-		List<CombinableArbitrary> childrenArbitraries = context.getElementCombinableArbitraryList();
+		List<CombinableArbitrary> elementArbitraryList = context.getElementCombinableArbitraryList();
 
 		return new ArbitraryIntrospectorResult(
 			new UniqueContainerCombinableArbitrary(
-				childrenArbitraries,
+				elementArbitraryList,
 				it -> context.isUniqueAndCheck(
 					context.getPathProperty(),
 					it

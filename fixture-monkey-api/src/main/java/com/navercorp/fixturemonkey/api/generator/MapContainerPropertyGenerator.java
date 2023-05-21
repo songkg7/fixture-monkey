@@ -31,6 +31,7 @@ import com.navercorp.fixturemonkey.api.property.MapKeyElementProperty;
 import com.navercorp.fixturemonkey.api.property.MapValueElementProperty;
 import com.navercorp.fixturemonkey.api.property.Property;
 import com.navercorp.fixturemonkey.api.type.Types;
+import com.navercorp.fixturemonkey.api.validator.EnumContainerBiggerThanEnumSizeException;
 
 @API(since = "0.4.0", status = Status.MAINTAINED)
 public final class MapContainerPropertyGenerator implements ContainerPropertyGenerator {
@@ -52,6 +53,7 @@ public final class MapContainerPropertyGenerator implements ContainerPropertyGen
 
 		AnnotatedType keyType = genericsTypes.get(0);
 		AnnotatedType valueType = genericsTypes.get(1);
+		Class<?> actualKeyType = Types.getActualType(keyType);
 
 		ArbitraryContainerInfo containerInfo = context.getContainerInfo();
 		if (containerInfo == null) {
@@ -59,13 +61,21 @@ public final class MapContainerPropertyGenerator implements ContainerPropertyGen
 				.getArbitraryContainerInfoGenerator(property)
 				.generate(context);
 
-			Class<?> actualKeyType = Types.getActualType(keyType);
 			if (actualKeyType.isEnum()) {
 				int enumSize = EnumSet.allOf((Class<? extends Enum>)actualKeyType).size();
 				containerInfo = new ArbitraryContainerInfo(
 					Math.min(containerInfo.getElementMinSize(), enumSize),
 					Math.min(containerInfo.getElementMaxSize(), enumSize)
 				);
+			}
+		} else {
+			if (actualKeyType.isEnum()) {
+				int enumSize = EnumSet.allOf((Class<? extends Enum>)actualKeyType).size();
+				if (containerInfo.getElementMaxSize() > enumSize) {
+					throw new EnumContainerBiggerThanEnumSizeException(
+						"Map key enum should not be bigger than enum size."
+					);
+				}
 			}
 		}
 

@@ -46,9 +46,7 @@ import javax.annotation.Nullable;
 
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
-import net.jqwik.api.Disabled;
 import net.jqwik.api.Property;
-import net.jqwik.api.TooManyFilterMissesException;
 
 import com.navercorp.fixturemonkey.ArbitraryBuilder;
 import com.navercorp.fixturemonkey.ArbitraryBuilders;
@@ -58,6 +56,7 @@ import com.navercorp.fixturemonkey.api.generator.ChildArbitraryContext;
 import com.navercorp.fixturemonkey.api.matcher.ExactTypeMatcher;
 import com.navercorp.fixturemonkey.api.matcher.MatcherOperator;
 import com.navercorp.fixturemonkey.api.type.TypeReference;
+import com.navercorp.fixturemonkey.api.validator.EnumContainerBiggerThanEnumSizeException;
 import com.navercorp.fixturemonkey.customizer.Values;
 import com.navercorp.fixturemonkey.test.ExpressionGeneratorTestSpecs.StringValue;
 import com.navercorp.fixturemonkey.test.FixtureMonkeyTestSpecs.ChildValue;
@@ -89,14 +88,6 @@ import com.navercorp.fixturemonkey.test.FixtureMonkeyTestSpecs.TwoEnum;
 
 class FixtureMonkeyTest {
 	private static final FixtureMonkey SUT = FixtureMonkey.create();
-
-	@Property
-	void sampleWithSimpleType() {
-		// when
-		SimpleObject actual = SUT.giveMeBuilder(SimpleObject.class).sample();
-
-		// then
-	}
 
 	@Property
 	void sampleWithType() {
@@ -1510,7 +1501,6 @@ class FixtureMonkeyTest {
 		then(values).hasSizeLessThanOrEqualTo(2);
 	}
 
-	@Disabled // TODO
 	@Property
 	void sizeEnumSetGreaterThanEnumSizeThrows() {
 		thenThrownBy(
@@ -1518,10 +1508,9 @@ class FixtureMonkeyTest {
 				})
 				.size("$", 3)
 				.sample()
-		).isExactlyInstanceOf(TooManyFilterMissesException.class);
+		).isExactlyInstanceOf(EnumContainerBiggerThanEnumSizeException.class);
 	}
 
-	@Disabled // TODO
 	@Property
 	void sizeEnumMapGreaterThanEnumSizeThrows() {
 		thenThrownBy(
@@ -1529,7 +1518,7 @@ class FixtureMonkeyTest {
 				})
 				.size("$", 3)
 				.sample()
-		).isExactlyInstanceOf(TooManyFilterMissesException.class);
+		).isExactlyInstanceOf(EnumContainerBiggerThanEnumSizeException.class);
 	}
 
 	@Property

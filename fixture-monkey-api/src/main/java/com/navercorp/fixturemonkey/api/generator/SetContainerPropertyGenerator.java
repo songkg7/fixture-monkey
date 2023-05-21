@@ -29,6 +29,7 @@ import org.apiguardian.api.API.Status;
 import com.navercorp.fixturemonkey.api.property.ElementProperty;
 import com.navercorp.fixturemonkey.api.property.Property;
 import com.navercorp.fixturemonkey.api.type.Types;
+import com.navercorp.fixturemonkey.api.validator.EnumContainerBiggerThanEnumSizeException;
 
 @API(since = "0.4.0", status = Status.MAINTAINED)
 public final class SetContainerPropertyGenerator implements ContainerPropertyGenerator {
@@ -50,19 +51,29 @@ public final class SetContainerPropertyGenerator implements ContainerPropertyGen
 
 		AnnotatedType elementType = elementTypes.get(0);
 		ArbitraryContainerInfo containerInfo = context.getContainerInfo();
+		Class<?> actualElementType = Types.getActualType(elementType.getType());
 
 		if (containerInfo == null) {
 			containerInfo = context.getGenerateOptions()
 				.getArbitraryContainerInfoGenerator(property)
 				.generate(context);
 
-			Class<?> actualElementType = Types.getActualType(elementType.getType());
 			if (actualElementType.isEnum()) {
 				int enumSize = EnumSet.allOf((Class<? extends Enum>)actualElementType).size();
 				containerInfo = new ArbitraryContainerInfo(
 					Math.min(containerInfo.getElementMinSize(), enumSize),
-					Math.min(containerInfo.getElementMaxSize(), enumSize)
+					Math.min(containerInfo.getElementMaxSize(), enumSize),
+					enumSize
 				);
+			}
+		} else {
+			if (actualElementType.isEnum()) {
+				int enumSize = EnumSet.allOf((Class<? extends Enum>)actualElementType).size();
+				if (containerInfo.getElementMaxSize() > enumSize) {
+					throw new EnumContainerBiggerThanEnumSizeException(
+						"Set of enum should not be bigger than enum size."
+					);
+				}
 			}
 		}
 
