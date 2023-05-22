@@ -103,7 +103,7 @@ public class JakartaValidationConstraintGenerator {
 				value = BigInteger.TEN.pow(integer - 1);
 			}
 			max = value.multiply(BigInteger.TEN).subtract(BigInteger.ONE);
-			min = max.negate();
+			min = value;
 		}
 
 		Optional<Min> minAnnotation = context.findAnnotation(Min.class);
@@ -233,7 +233,7 @@ public class JakartaValidationConstraintGenerator {
 				value = BigDecimal.TEN.pow(integer - 1);
 			}
 			max = value.multiply(BigDecimal.TEN).subtract(BigDecimal.ONE);
-			min = max.negate();
+			min = value;
 			scale = digits.get().fraction();
 		}
 

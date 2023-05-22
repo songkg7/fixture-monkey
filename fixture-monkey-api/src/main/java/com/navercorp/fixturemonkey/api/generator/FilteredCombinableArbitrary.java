@@ -30,12 +30,14 @@ import com.navercorp.fixturemonkey.api.exception.ValidationFailedException;
 
 @API(since = "0.5.0", status = Status.EXPERIMENTAL)
 public final class FilteredCombinableArbitrary implements CombinableArbitrary {
+	private static final int FAILED_THRESHOLD = 3;
+
 	private final int maxMisses;
 	private final CombinableArbitrary combinableArbitrary;
 	private final Predicate<Object> predicate;
 
 	private Exception lastException;
-	private boolean failed = false;
+	private int failureCount = 0;
 
 	public FilteredCombinableArbitrary(
 		int maxMisses,
@@ -49,7 +51,7 @@ public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 
 	@Override
 	public Object combined() {
-		if (failed) {
+		if (failureCount == FAILED_THRESHOLD) {
 			throw new FilterMissException(lastException);
 		}
 
@@ -61,17 +63,20 @@ public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 					return returned;
 				}
 			} catch (TooManyFilterMissesException | ValidationFailedException | FilterMissException ex) {
+				if (combinableArbitrary.fixed()) {
+					break;
+				}
 				lastException = ex;
 				combinableArbitrary.clear();
 			}
 		}
-		failed = true;
+		failureCount++;
 		throw new FilterMissException(lastException);
 	}
 
 	@Override
 	public Object rawValue() {
-		if (failed) {
+		if (failureCount == FAILED_THRESHOLD) {
 			throw new FilterMissException(lastException);
 		}
 
@@ -83,17 +88,20 @@ public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 					return returned;
 				}
 			} catch (TooManyFilterMissesException | ValidationFailedException | FilterMissException ex) {
+				if (combinableArbitrary.fixed()) {
+					break;
+				}
 				lastException = ex;
 				combinableArbitrary.clear();
 			}
 		}
-		failed = true;
+		failureCount++;
 		throw new FilterMissException(lastException);
 	}
 
 	@Override
 	public void clear() {
-		if (failed) {
+		if (failureCount == FAILED_THRESHOLD) {
 			return;
 		}
 		combinableArbitrary.clear();
@@ -101,6 +109,6 @@ public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 
 	@Override
 	public boolean fixed() {
-		return combinableArbitrary.fixed();
+		return failureCount == FAILED_THRESHOLD || combinableArbitrary.fixed();
 	}
 }

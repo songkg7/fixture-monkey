@@ -27,9 +27,8 @@ import javax.annotation.Nullable;
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
-import net.jqwik.api.Arbitrary;
-
 import com.navercorp.fixturemonkey.api.generator.ArbitraryProperty;
+import com.navercorp.fixturemonkey.api.generator.CombinableArbitrary;
 import com.navercorp.fixturemonkey.api.property.Property;
 
 @API(since = "0.4.0", status = Status.MAINTAINED)
@@ -47,7 +46,7 @@ public final class ObjectNode {
 	private List<ObjectNode> children;
 
 	@Nullable
-	private Arbitrary<?> arbitrary;
+	private CombinableArbitrary arbitrary;
 
 	private boolean manipulated = false;
 
@@ -99,11 +98,11 @@ public final class ObjectNode {
 	}
 
 	@Nullable
-	public Arbitrary<?> getArbitrary() {
+	public CombinableArbitrary getArbitrary() {
 		return this.arbitrary;
 	}
 
-	public void setArbitrary(@Nullable Arbitrary<?> arbitrary) {
+	public void setArbitrary(@Nullable CombinableArbitrary arbitrary) {
 		this.arbitrary = arbitrary;
 	}
 

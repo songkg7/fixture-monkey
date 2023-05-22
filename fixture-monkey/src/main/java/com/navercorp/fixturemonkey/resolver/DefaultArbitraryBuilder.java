@@ -52,6 +52,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import com.navercorp.fixturemonkey.ArbitraryBuilder;
 import com.navercorp.fixturemonkey.api.customizer.FixtureCustomizer;
 import com.navercorp.fixturemonkey.api.expression.ExpressionGenerator;
+import com.navercorp.fixturemonkey.api.generator.FilteredCombinableArbitrary;
 import com.navercorp.fixturemonkey.api.lazy.LazyArbitrary;
 import com.navercorp.fixturemonkey.api.matcher.MatcherOperator;
 import com.navercorp.fixturemonkey.api.property.PropertyNameResolver;
@@ -416,13 +417,16 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T> {
 		List<ArbitraryManipulator> buildManipulators = new ArrayList<>(this.context.getManipulators());
 
 		return Arbitraries.ofSuppliers(
-			() -> (T)this.resolver.resolve(
-				this.rootProperty,
-				buildManipulators,
-				context.getCustomizers(),
-				context.getContainerInfoManipulators()
+			() -> (T)new FilteredCombinableArbitrary(
+				30,
+				this.resolver.resolve(
+					this.rootProperty,
+					buildManipulators,
+					context.getCustomizers(),
+					context.getContainerInfoManipulators()
+				),
+				this.validateFilter(context.isValidOnly())
 			)
-				.filter(this.validateFilter(context.isValidOnly()))
 				.combined()
 		);
 	}

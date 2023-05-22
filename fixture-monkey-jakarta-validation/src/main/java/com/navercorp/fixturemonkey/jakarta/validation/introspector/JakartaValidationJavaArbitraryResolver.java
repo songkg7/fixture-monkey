@@ -195,6 +195,7 @@ public final class JakartaValidationJavaArbitraryResolver implements JavaArbitra
 		JakartaValidationDecimalConstraint constraint = this.constraintGenerator.generateDecimalConstraint(context);
 		BigDecimal min = constraint.getMin();
 		BigDecimal max = constraint.getMax();
+		Integer scale = constraint.getScale();
 		Boolean minInclusive = constraint.getMinInclusive();
 		Boolean maxInclusive = constraint.getMaxInclusive();
 
@@ -212,6 +213,9 @@ public final class JakartaValidationJavaArbitraryResolver implements JavaArbitra
 				floatArbitrary = floatArbitrary.lessOrEqual(max.floatValue());
 			}
 		}
+		if (scale != null) {
+			floatArbitrary = floatArbitrary.ofScale(scale);
+		}
 
 		return floatArbitrary;
 	}
@@ -224,6 +228,7 @@ public final class JakartaValidationJavaArbitraryResolver implements JavaArbitra
 		JakartaValidationDecimalConstraint constraint = this.constraintGenerator.generateDecimalConstraint(context);
 		BigDecimal min = constraint.getMin();
 		BigDecimal max = constraint.getMax();
+		Integer scale = constraint.getScale();
 		Boolean minInclusive = constraint.getMinInclusive();
 		Boolean maxInclusive = constraint.getMaxInclusive();
 
@@ -240,6 +245,9 @@ public final class JakartaValidationJavaArbitraryResolver implements JavaArbitra
 			} else {
 				doubleArbitrary = doubleArbitrary.lessOrEqual(max.doubleValue());
 			}
+		}
+		if (scale != null) {
+			doubleArbitrary = doubleArbitrary.ofScale(scale);
 		}
 
 		return doubleArbitrary;

@@ -37,8 +37,6 @@ import com.navercorp.fixturemonkey.api.generator.ArbitraryGeneratorContext;
 import com.navercorp.fixturemonkey.api.generator.ArbitraryProperty;
 import com.navercorp.fixturemonkey.api.generator.CombinableArbitrary;
 import com.navercorp.fixturemonkey.api.generator.FixedCombinableArbitrary;
-import com.navercorp.fixturemonkey.api.generator.LazyCombinableArbitrary;
-import com.navercorp.fixturemonkey.api.lazy.LazyArbitrary;
 import com.navercorp.fixturemonkey.api.matcher.MatcherOperator;
 import com.navercorp.fixturemonkey.api.option.GenerateOptions;
 import com.navercorp.fixturemonkey.api.property.Property;
@@ -138,12 +136,8 @@ public final class ObjectTree {
 	) {
 		CombinableArbitrary generated;
 		if (node.getArbitrary() != null) {
-			generated = new LazyCombinableArbitrary(LazyArbitrary.lazy(
-				() -> node.getArbitrary() // fixed
-					.injectNull(node.getArbitraryProperty().getObjectProperty().getNullInject())
-					.sample()
-			)
-			);
+			generated = node.getArbitrary()
+				.injectNull(node.getArbitraryProperty().getObjectProperty().getNullInject());
 		} else {
 			ArbitraryGeneratorContext childArbitraryGeneratorContext = this.generateContext(node, customizers, ctx);
 
