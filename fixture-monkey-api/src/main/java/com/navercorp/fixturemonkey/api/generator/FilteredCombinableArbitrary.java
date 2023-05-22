@@ -33,7 +33,9 @@ public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 	private final int maxMisses;
 	private final CombinableArbitrary combinableArbitrary;
 	private final Predicate<Object> predicate;
+
 	private Exception lastException;
+	private boolean failed = false;
 
 	public FilteredCombinableArbitrary(
 		int maxMisses,
@@ -47,6 +49,10 @@ public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 
 	@Override
 	public Object combined() {
+		if (failed) {
+			throw new FilterMissException(lastException);
+		}
+
 		Object returned;
 		for (int i = 0; i < maxMisses; i++) {
 			try {
@@ -56,16 +62,19 @@ public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 				}
 			} catch (TooManyFilterMissesException | ValidationFailedException | FilterMissException ex) {
 				lastException = ex;
-			} finally {
 				combinableArbitrary.clear();
 			}
 		}
-
+		failed = true;
 		throw new FilterMissException(lastException);
 	}
 
 	@Override
 	public Object rawValue() {
+		if (failed) {
+			throw new FilterMissException(lastException);
+		}
+
 		Object returned;
 		for (int i = 0; i < maxMisses; i++) {
 			try {
@@ -75,16 +84,18 @@ public final class FilteredCombinableArbitrary implements CombinableArbitrary {
 				}
 			} catch (TooManyFilterMissesException | ValidationFailedException | FilterMissException ex) {
 				lastException = ex;
-			} finally {
 				combinableArbitrary.clear();
 			}
 		}
-
+		failed = true;
 		throw new FilterMissException(lastException);
 	}
 
 	@Override
 	public void clear() {
+		if (failed) {
+			return;
+		}
 		combinableArbitrary.clear();
 	}
 

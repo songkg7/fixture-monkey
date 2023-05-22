@@ -20,6 +20,8 @@ package com.navercorp.fixturemonkey.api.generator;
 
 import java.lang.reflect.Proxy;
 
+import javax.annotation.Nullable;
+
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
@@ -65,6 +67,7 @@ public final class NullInjectCombinableArbitrary implements CombinableArbitrary 
 		return combinableArbitrary.fixed();
 	}
 
+	@Nullable
 	private Object injectNull(Object object) {
 		int frequencyNull = (int)Math.round(nullProbability * 1000);
 		if (frequencyNull <= 0) {

@@ -20,6 +20,7 @@ package com.navercorp.fixturemonkey.tests.java;
 
 import static com.navercorp.fixturemonkey.tests.TestEnvironment.TEST_COUNT;
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.assertj.core.api.BDDAssertions.thenThrownBy;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import com.navercorp.fixturemonkey.ArbitraryBuilder;
 import com.navercorp.fixturemonkey.FixtureMonkey;
+import com.navercorp.fixturemonkey.api.exception.FilterMissException;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.type.TypeReference;
 import com.navercorp.fixturemonkey.tests.java.ImmutableGenericTypeSpecs.GenericImplementationObject;
@@ -349,5 +351,14 @@ class JavaTest {
 
 		String notExpected = builder.sample();
 		then(actual).isNotEqualTo(notExpected);
+	}
+
+	@Test
+	void setPostConditionFailed() {
+		thenThrownBy(
+			() -> SUT.giveMeBuilder(String.class)
+				.setPostCondition(it -> it.equals("test"))
+				.sample()
+		).isExactlyInstanceOf(FilterMissException.class);
 	}
 }
