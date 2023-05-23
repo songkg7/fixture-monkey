@@ -22,6 +22,7 @@ import static com.navercorp.fixturemonkey.tests.TestEnvironment.TEST_COUNT;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.assertj.core.api.BDDAssertions.thenThrownBy;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +40,7 @@ import com.navercorp.fixturemonkey.tests.java.ImmutableGenericTypeSpecs.GenericI
 import com.navercorp.fixturemonkey.tests.java.ImmutableGenericTypeSpecs.GenericObject;
 import com.navercorp.fixturemonkey.tests.java.ImmutableGenericTypeSpecs.TwoGenericImplementationObject;
 import com.navercorp.fixturemonkey.tests.java.ImmutableJavaTestSpecs.ContainerObject;
+import com.navercorp.fixturemonkey.tests.java.ImmutableJavaTestSpecs.Enum;
 import com.navercorp.fixturemonkey.tests.java.ImmutableJavaTestSpecs.JavaTypeObject;
 import com.navercorp.fixturemonkey.tests.java.ImmutableRecursiveTypeSpecs.SelfRecursiveListObject;
 import com.navercorp.fixturemonkey.tests.java.ImmutableRecursiveTypeSpecs.SelfRecursiveObject;
@@ -360,5 +362,20 @@ class JavaTest {
 				.setPostCondition(it -> it.equals("test"))
 				.sample()
 		).isExactlyInstanceOf(FilterMissException.class);
+	}
+
+	@RepeatedTest(TEST_COUNT)
+	void setEnumSet() {
+		Set<Enum> set = new HashSet<>();
+		set.add(Enum.ONE);
+		set.add(Enum.TWO);
+		set.add(Enum.THREE);
+
+		Set<Enum> actual = SUT.giveMeBuilder(new TypeReference<Set<Enum>>() {
+			})
+			.set("$", set)
+			.sample();
+
+		then(actual).hasSize(3);
 	}
 }
