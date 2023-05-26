@@ -29,6 +29,8 @@ dependencies {
     jmhImplementation(project(":fixture-monkey-javax-validation"))
     jmhImplementation(project(":fixture-monkey-jackson"))
     jmhAnnotationProcessor("org.projectlombok:lombok:1.18.24")
+    jmhAnnotationProcessor("org.openjdk.jmh:jmh-core:1.35")
+    jmhAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.35")
 }
 
 editorconfig {

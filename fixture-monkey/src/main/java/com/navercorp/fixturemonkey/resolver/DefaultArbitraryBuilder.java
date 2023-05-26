@@ -67,7 +67,6 @@ import com.navercorp.fixturemonkey.customizer.InnerSpec;
 import com.navercorp.fixturemonkey.customizer.ManipulatorSet;
 import com.navercorp.fixturemonkey.customizer.MonkeyManipulatorFactory;
 import com.navercorp.fixturemonkey.tree.ArbitraryTraverser;
-import com.navercorp.fixturemonkey.tree.IdentityNodeResolver;
 
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_SUPERCLASS")
 @API(since = "0.4.0", status = Status.MAINTAINED)
@@ -86,6 +85,8 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T> {
 
 	private boolean fixed = false;
 	private CombinableArbitrary fixedArbitrary = null;
+	private int fixedManipulatorIndex = 0;
+	private int fixedContainerManipulatorIndex = 0;
 
 	public DefaultArbitraryBuilder(
 		ManipulateOptions manipulateOptions,
@@ -248,10 +249,19 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T> {
 	) {
 		this.context.getContainerInfoManipulators().forEach(ContainerInfoManipulator::fixed);
 
-		T sample = this.sample();
-		this.set("$", sample);
-		biConsumer.accept(sample, this);
-		this.fixed();
+		ArbitraryBuilder<T> copied = this.copy();
+		LazyArbitrary<T> lazyArbitrary = LazyArbitrary.lazy(
+			() -> {
+				ArbitraryBuilder<T> copy = copied.copy();
+				T sample = copy.sample();
+				copy.set("$", sample);
+				biConsumer.accept(sample, copy);
+				return copy.sample();
+			}
+		);
+
+		context.addManipulator(monkeyManipulatorFactory.newArbitraryManipulator("$", lazyArbitrary));
+
 		return this;
 	}
 
@@ -426,24 +436,32 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T> {
 		List<ContainerInfoManipulator> containerInfoManipulators
 	) {
 		if (fixed) {
-			LazyArbitrary<Object> combined = LazyArbitrary.lazy(
-				() -> new FilteredCombinableArbitrary(
-					30,
-					resolver.resolve(
-						rootProperty,
-						buildManipulators,
-						context.getCustomizers(),
-						containerInfoManipulators
-					),
-					validateFilter(context.isValidOnly())
-				).combined()
-			);
-
-			if (fixedArbitrary == null) {
+			if (fixedArbitrary == null
+				|| buildManipulators.size() > fixedManipulatorIndex
+				|| containerInfoManipulators.size() > fixedContainerManipulatorIndex
+			) {
+				fixedManipulatorIndex = buildManipulators.size() - 1;
+				fixedContainerManipulatorIndex = containerInfoManipulators.size() - 1;
 				fixedArbitrary = new CombinableArbitrary() {
 					@Override
 					public Object combined() {
-						return combined.getValue();
+						Object value = LazyArbitrary.lazy(
+							() -> new FilteredCombinableArbitrary(
+								30,
+								resolver.resolve(
+									rootProperty,
+									buildManipulators,
+									context.getCustomizers(),
+									containerInfoManipulators
+								),
+								validateFilter(context.isValidOnly())
+							).combined()
+						).getValue();
+
+						context.addManipulator(
+							monkeyManipulatorFactory.newArbitraryManipulator("$", value)
+						);
+						return value;
 					}
 
 					@Override

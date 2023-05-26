@@ -942,7 +942,7 @@ class FixtureMonkeyTest {
 			.zipWith(stringArbitraryBuilder, (integer, string) -> integer + "" + string)
 			.sample();
 
-		then(actual).isNotNull();
+		then(actual).isEqualTo("test");
 	}
 
 	@Property

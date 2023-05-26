@@ -31,6 +31,9 @@ import java.util.Set;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
+import net.jqwik.api.Arbitraries;
+import net.jqwik.api.Arbitrary;
+
 import com.navercorp.fixturemonkey.ArbitraryBuilder;
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.exception.FilterMissException;
@@ -377,5 +380,33 @@ class JavaTest {
 			.sample();
 
 		then(actual).hasSize(3);
+	}
+
+	@RepeatedTest(TEST_COUNT)
+	void fixedJavaTypeSet() {
+		ArbitraryBuilder<JavaTypeObject> fixedBuilder = SUT.giveMeBuilder(new TypeReference<JavaTypeObject>() {
+			})
+			.fixed();
+		fixedBuilder.sample();
+
+		String actual = fixedBuilder.set("string", "test")
+			.sample()
+			.getString();
+
+		then(actual).isEqualTo("test");
+	}
+
+	// acceptIf 2번
+	@RepeatedTest(TEST_COUNT)
+	void nestedAcceptIf() {
+		Arbitrary<String> apply = SUT.giveMeBuilder(String.class)
+			.set("$", Arbitraries.strings())
+			.apply((str, builder) -> builder.set("$", str + "1"))
+			.build();
+
+		String actual = apply.sample();
+
+		String notExpected = apply.sample();
+		then(actual).isNotEqualTo(notExpected);
 	}
 }
