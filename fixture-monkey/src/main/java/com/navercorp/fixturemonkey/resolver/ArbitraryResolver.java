@@ -104,7 +104,7 @@ public final class ArbitraryResolver {
 			.optimize(joinedManipulators)
 			.getManipulators();
 
-		return new CombinableArbitrary() {
+		CombinableArbitrary combinableArbitrary = new CombinableArbitrary() {
 			private final LazyArbitrary<CombinableArbitrary> lazyArbitrary = LazyArbitrary.lazy(
 				() -> {
 					for (ArbitraryManipulator manipulator : optimizedManipulator) {
@@ -139,5 +139,6 @@ public final class ArbitraryResolver {
 				return false;
 			}
 		};
+		return combinableArbitrary;
 	}
 }

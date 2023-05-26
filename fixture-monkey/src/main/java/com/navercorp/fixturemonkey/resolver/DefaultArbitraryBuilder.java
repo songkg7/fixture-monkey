@@ -52,6 +52,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import com.navercorp.fixturemonkey.ArbitraryBuilder;
 import com.navercorp.fixturemonkey.api.customizer.FixtureCustomizer;
 import com.navercorp.fixturemonkey.api.expression.ExpressionGenerator;
+import com.navercorp.fixturemonkey.api.generator.CombinableArbitrary;
 import com.navercorp.fixturemonkey.api.generator.FilteredCombinableArbitrary;
 import com.navercorp.fixturemonkey.api.lazy.LazyArbitrary;
 import com.navercorp.fixturemonkey.api.matcher.MatcherOperator;
@@ -66,6 +67,7 @@ import com.navercorp.fixturemonkey.customizer.InnerSpec;
 import com.navercorp.fixturemonkey.customizer.ManipulatorSet;
 import com.navercorp.fixturemonkey.customizer.MonkeyManipulatorFactory;
 import com.navercorp.fixturemonkey.tree.ArbitraryTraverser;
+import com.navercorp.fixturemonkey.tree.IdentityNodeResolver;
 
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_SUPERCLASS")
 @API(since = "0.4.0", status = Status.MAINTAINED)
@@ -81,6 +83,9 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T> {
 	@SuppressWarnings("rawtypes")
 	private final Map<String, ConstraintViolation> violations = new ConcurrentHashMap<>();
 	private Exception lastException;
+
+	private boolean fixed = false;
+	private CombinableArbitrary fixedArbitrary = null;
 
 	public DefaultArbitraryBuilder(
 		ManipulateOptions manipulateOptions,
@@ -233,9 +238,7 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T> {
 	public ArbitraryBuilder<T> fixed() {
 		this.context.getContainerInfoManipulators().forEach(ContainerInfoManipulator::fixed);
 
-		ArbitraryManipulator arbitraryManipulator =
-			monkeyManipulatorFactory.newArbitraryManipulator(HEAD_NAME, this.sample());
-		this.context.addManipulator(arbitraryManipulator);
+		fixed = true;
 		return this;
 	}
 
@@ -245,20 +248,10 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T> {
 	) {
 		this.context.getContainerInfoManipulators().forEach(ContainerInfoManipulator::fixed);
 
-		ArbitraryBuilder<T> appliedBuilder = this.copy();
-
-		LazyArbitrary<T> lazyArbitrary = LazyArbitrary.lazy(
-			() -> {
-				ArbitraryBuilder<T> lazyBuilder = appliedBuilder.copy();
-				T sampled = lazyBuilder.fixed().sample();
-				biConsumer.accept(sampled, lazyBuilder);
-				return lazyBuilder.sample();
-			}
-		);
-
-		ArbitraryManipulator arbitraryManipulator =
-			monkeyManipulatorFactory.newArbitraryManipulator("$", lazyArbitrary);
-		this.context.addManipulator(arbitraryManipulator);
+		T sample = this.sample();
+		this.set("$", sample);
+		biConsumer.accept(sample, this);
+		this.fixed();
 		return this;
 	}
 
@@ -415,19 +408,72 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T> {
 	@Override
 	public Arbitrary<T> build() {
 		List<ArbitraryManipulator> buildManipulators = new ArrayList<>(this.context.getManipulators());
+		List<ContainerInfoManipulator> containerInfoManipulators =
+			new ArrayList<>(this.context.getContainerInfoManipulators());
 
 		return Arbitraries.ofSuppliers(
-			() -> (T)new FilteredCombinableArbitrary(
-				30,
-				this.resolver.resolve(
-					this.rootProperty,
-					buildManipulators,
-					context.getCustomizers(),
-					context.getContainerInfoManipulators()
-				),
-				this.validateFilter(context.isValidOnly())
+			() -> (T)resolve(
+				buildManipulators,
+				containerInfoManipulators
 			)
 				.combined()
+		);
+	}
+
+	@SuppressWarnings("unchecked")
+	public CombinableArbitrary resolve(
+		List<ArbitraryManipulator> buildManipulators,
+		List<ContainerInfoManipulator> containerInfoManipulators
+	) {
+		if (fixed) {
+			LazyArbitrary<Object> combined = LazyArbitrary.lazy(
+				() -> new FilteredCombinableArbitrary(
+					30,
+					resolver.resolve(
+						rootProperty,
+						buildManipulators,
+						context.getCustomizers(),
+						containerInfoManipulators
+					),
+					validateFilter(context.isValidOnly())
+				).combined()
+			);
+
+			if (fixedArbitrary == null) {
+				fixedArbitrary = new CombinableArbitrary() {
+					@Override
+					public Object combined() {
+						return combined.getValue();
+					}
+
+					@Override
+					public Object rawValue() {
+						return null;
+					}
+
+					@Override
+					public void clear() {
+					}
+
+					@Override
+					public boolean fixed() {
+						return false;
+					}
+				};
+			}
+
+			return fixedArbitrary;
+		}
+
+		return new FilteredCombinableArbitrary(
+			30,
+			resolver.resolve(
+				rootProperty,
+				buildManipulators,
+				context.getCustomizers(),
+				containerInfoManipulators
+			),
+			validateFilter(context.isValidOnly())
 		);
 	}
 
