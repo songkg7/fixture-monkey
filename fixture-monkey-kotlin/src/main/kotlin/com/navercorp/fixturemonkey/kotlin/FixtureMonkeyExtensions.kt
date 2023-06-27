@@ -21,7 +21,11 @@ package com.navercorp.fixturemonkey.kotlin
 import com.navercorp.fixturemonkey.ArbitraryBuilder
 import com.navercorp.fixturemonkey.FixtureMonkey
 import com.navercorp.fixturemonkey.api.type.TypeReference
+import com.navercorp.fixturemonkey.api.type.Types
 import net.jqwik.api.Arbitrary
+import java.lang.reflect.AnnotatedType
+import kotlin.reflect.KFunction
+import kotlin.reflect.jvm.javaType
 import kotlin.streams.asSequence
 
 inline fun <reified T : Any?> FixtureMonkey.giveMe(): Sequence<T> =
@@ -37,3 +41,17 @@ inline fun <reified T : Any?> FixtureMonkey.giveMeArbitrary(): Arbitrary<T> =
 
 inline fun <reified T : Any?> FixtureMonkey.giveMeBuilder(): ArbitraryBuilder<T> =
     this.giveMeBuilder(object : TypeReference<T>() {})
+
+fun <T : KFunction<*>> FixtureMonkey.giveMeMethod(kFunction: T): Any? {
+    val valuesByParameters = kFunction.parameters.associateWith {
+        this.giveMeOne(
+            object : TypeReference<Any>() {
+                override fun getAnnotatedType(): AnnotatedType {
+                    return Types.generateAnnotatedTypeWithoutAnnotation(it.type.javaType)
+                }
+            },
+        )
+    }
+
+    return kFunction.callBy(valuesByParameters)
+}
