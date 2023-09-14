@@ -16,28 +16,35 @@
  * limitations under the License.
  */
 
-package com.navercorp.fixturemonkey.api.introspector;
+package com.navercorp.fixturemonkey.api.jqwik;
 
-import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
+import net.jqwik.api.Arbitrary;
+
 import com.navercorp.fixturemonkey.api.arbitrary.CombinableArbitrary;
-import com.navercorp.fixturemonkey.api.generator.ArbitraryGeneratorContext;
-import com.navercorp.fixturemonkey.api.matcher.Matcher;
-import com.navercorp.fixturemonkey.api.matcher.Matchers;
-import com.navercorp.fixturemonkey.api.property.Property;
+import com.navercorp.fixturemonkey.api.lazy.LazyArbitrary;
 
-@API(since = "0.4.0", status = Status.MAINTAINED)
-public final class UuidIntrospector implements ArbitraryIntrospector, Matcher {
-	@Override
-	public boolean match(Property property) {
-		return Matchers.UUID_TYPE_MATCHER.match(property);
-	}
+@API(since = "0.6.8", status = Status.EXPERIMENTAL)
+public final class ArbitraryUtils {
+	private static final ReentrantLock LOCK = new ReentrantLock();
 
-	@Override
-	public ArbitraryIntrospectorResult introspect(ArbitraryGeneratorContext context) {
-		return new ArbitraryIntrospectorResult(CombinableArbitrary.from(UUID::randomUUID));
+	public static <T> CombinableArbitrary<T> toCombinableArbitrary(Arbitrary<T> arbitrary) {
+		return CombinableArbitrary.from(LazyArbitrary.lazy(
+			() -> {
+				if (arbitrary != null) {
+					LOCK.lock();
+					try {
+						return arbitrary.sample();
+					} finally {
+						LOCK.unlock();
+					}
+				}
+				return null;
+			}
+		));
 	}
 }
