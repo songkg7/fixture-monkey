@@ -18,6 +18,8 @@
 
 package com.navercorp.fixturemonkey.customizer;
 
+import java.util.Objects;
+
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
@@ -52,5 +54,23 @@ public final class ArbitraryManipulator {
 
 	public void manipulate(ObjectTree tree) {
 		tree.manipulate(nodeResolver, nodeManipulator);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		ArbitraryManipulator that = (ArbitraryManipulator)obj;
+		return Objects.equals(nodeResolver, that.nodeResolver)
+			&& Objects.equals(nodeManipulator, that.nodeManipulator);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(nodeResolver, nodeManipulator);
 	}
 }

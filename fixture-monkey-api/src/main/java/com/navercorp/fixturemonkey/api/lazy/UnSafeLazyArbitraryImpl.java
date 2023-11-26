@@ -18,6 +18,7 @@
 
 package com.navercorp.fixturemonkey.api.lazy;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
@@ -64,5 +65,24 @@ public final class UnSafeLazyArbitraryImpl<T> implements LazyArbitrary<T> {
 		if (!fixed) {
 			this.value = UNINITIALIZED_VALUE;
 		}
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		UnSafeLazyArbitraryImpl<?> that = (UnSafeLazyArbitraryImpl<?>)obj;
+		return fixed == that.fixed
+			&& Objects.equals(initializer, that.initializer)
+			&& Objects.equals(value, that.value);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(initializer, fixed, value);
 	}
 }

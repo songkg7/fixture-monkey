@@ -37,4 +37,17 @@ public final class StartNodePredicate implements NextNodePredicate {
 	public boolean test(ObjectProperty currentObjectProperty) {
 		return true; // always returns true since the first node has no constraint
 	}
+
+	@Override
+	public int hashCode() {
+		return StartNodePredicate.class.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		return obj != null && getClass() == obj.getClass();
+	}
 }

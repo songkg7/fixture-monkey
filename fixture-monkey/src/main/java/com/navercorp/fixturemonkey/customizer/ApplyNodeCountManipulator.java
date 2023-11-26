@@ -18,6 +18,8 @@
 
 package com.navercorp.fixturemonkey.customizer;
 
+import java.util.Objects;
+
 import com.navercorp.fixturemonkey.tree.ObjectNode;
 
 public final class ApplyNodeCountManipulator implements NodeManipulator {
@@ -35,5 +37,22 @@ public final class ApplyNodeCountManipulator implements NodeManipulator {
 			count--;
 			nodeManipulator.manipulate(objectNode);
 		}
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		ApplyNodeCountManipulator that = (ApplyNodeCountManipulator)obj;
+		return count == that.count && Objects.equals(nodeManipulator, that.nodeManipulator);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(nodeManipulator, count);
 	}
 }

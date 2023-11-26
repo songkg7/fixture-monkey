@@ -19,6 +19,7 @@
 package com.navercorp.fixturemonkey.tree;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
@@ -44,5 +45,22 @@ public final class ApplyStrictModeResolver implements NodeResolver {
 	@Override
 	public List<NextNodePredicate> toNextNodePredicate() {
 		return nodeResolver.toNextNodePredicate();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		ApplyStrictModeResolver that = (ApplyStrictModeResolver)obj;
+		return Objects.equals(nodeResolver, that.nodeResolver);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(nodeResolver);
 	}
 }

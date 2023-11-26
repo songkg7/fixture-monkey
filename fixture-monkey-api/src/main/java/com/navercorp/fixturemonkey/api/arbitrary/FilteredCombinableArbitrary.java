@@ -18,6 +18,7 @@
 
 package com.navercorp.fixturemonkey.api.arbitrary;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.apiguardian.api.API;
@@ -197,5 +198,23 @@ final class FilteredCombinableArbitrary<T> implements CombinableArbitrary<T> {
 	@Override
 	public boolean fixed() {
 		return combinableArbitrary.fixed();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		FilteredCombinableArbitrary<?> that = (FilteredCombinableArbitrary<?>)obj;
+		return Objects.equals(combinableArbitrary, that.combinableArbitrary) && Objects.equals(
+			predicate, that.predicate);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(combinableArbitrary, predicate);
 	}
 }

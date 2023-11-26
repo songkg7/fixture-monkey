@@ -18,6 +18,8 @@
 
 package com.navercorp.fixturemonkey.tree;
 
+import java.util.Objects;
+
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
@@ -35,5 +37,22 @@ public final class PropertyPredicate implements NextNodePredicate {
 	@Override
 	public boolean test(ObjectProperty currentObjectProperty) {
 		return property.equals(currentObjectProperty.getProperty());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		PropertyPredicate that = (PropertyPredicate)obj;
+		return Objects.equals(property, that.property);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(property);
 	}
 }

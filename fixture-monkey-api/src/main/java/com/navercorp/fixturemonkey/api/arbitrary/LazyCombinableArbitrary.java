@@ -18,6 +18,8 @@
 
 package com.navercorp.fixturemonkey.api.arbitrary;
 
+import java.util.Objects;
+
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
@@ -57,5 +59,22 @@ final class LazyCombinableArbitrary<T> implements CombinableArbitrary<T> {
 	@Override
 	public boolean fixed() {
 		return false;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		LazyCombinableArbitrary<?> that = (LazyCombinableArbitrary<?>)obj;
+		return Objects.equals(introspected, that.introspected);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(introspected);
 	}
 }

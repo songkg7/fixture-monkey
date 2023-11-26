@@ -20,6 +20,7 @@ package com.navercorp.fixturemonkey.customizer;
 
 import static com.navercorp.fixturemonkey.api.type.Types.isAssignable;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.apiguardian.api.API;
@@ -48,5 +49,22 @@ public final class NodeFilterManipulator implements NodeManipulator {
 			);
 		}
 		objectNode.addArbitraryFilter(filter);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		NodeFilterManipulator that = (NodeFilterManipulator)obj;
+		return Objects.equals(type, that.type) && Objects.equals(filter, that.filter);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(type, filter);
 	}
 }

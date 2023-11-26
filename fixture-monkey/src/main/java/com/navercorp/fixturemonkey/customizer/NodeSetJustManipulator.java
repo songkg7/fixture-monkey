@@ -18,6 +18,8 @@
 
 package com.navercorp.fixturemonkey.customizer;
 
+import java.util.Objects;
+
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
@@ -41,5 +43,22 @@ public final class NodeSetJustManipulator implements NodeManipulator {
 		} else {
 			objectNode.setArbitrary(CombinableArbitrary.from(exactValue));
 		}
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		NodeSetJustManipulator that = (NodeSetJustManipulator)obj;
+		return Objects.equals(value, that.value);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(value);
 	}
 }

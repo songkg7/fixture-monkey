@@ -25,6 +25,7 @@ import static com.navercorp.fixturemonkey.api.type.Types.isAssignable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -164,5 +165,22 @@ public final class NodeSetDecomposedValueManipulator<T> implements NodeManipulat
 				setValue(child, childProperty.getValue(value));
 			}
 		}
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		NodeSetDecomposedValueManipulator<?> that = (NodeSetDecomposedValueManipulator<?>)obj;
+		return sequence == that.sequence && Objects.equals(value, that.value);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(sequence, value);
 	}
 }

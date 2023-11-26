@@ -32,4 +32,17 @@ public final class NodeValuePredicate implements NextNodePredicate {
 		Property property = currentObjectProperty.getProperty();
 		return property instanceof MapValueElementProperty;
 	}
+
+	@Override
+	public int hashCode() {
+		return NodeValuePredicate.class.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		return obj != null && getClass() == obj.getClass();
+	}
 }

@@ -18,6 +18,8 @@
 
 package com.navercorp.fixturemonkey.api.arbitrary;
 
+import java.util.Objects;
+
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
@@ -60,5 +62,23 @@ public final class TraceableCombinableArbitrary<T> implements CombinableArbitrar
 	@Override
 	public PropertyPath getPropertyPath() {
 		return propertyPath;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		TraceableCombinableArbitrary<?> that = (TraceableCombinableArbitrary<?>)obj;
+		return Objects.equals(combinableArbitrary, that.combinableArbitrary)
+			&& Objects.equals(propertyPath, that.propertyPath);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(combinableArbitrary, propertyPath);
 	}
 }

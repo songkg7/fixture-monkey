@@ -18,6 +18,8 @@
 
 package com.navercorp.fixturemonkey.api.generator;
 
+import java.util.Objects;
+
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
@@ -54,6 +56,23 @@ public final class ArbitraryContainerInfo {
 		}
 
 		return this.elementMinSize + Randoms.nextInt(this.elementMaxSize - this.elementMinSize + 1);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		ArbitraryContainerInfo that = (ArbitraryContainerInfo)obj;
+		return elementMinSize == that.elementMinSize && elementMaxSize == that.elementMaxSize;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(elementMinSize, elementMaxSize);
 	}
 
 	@Override

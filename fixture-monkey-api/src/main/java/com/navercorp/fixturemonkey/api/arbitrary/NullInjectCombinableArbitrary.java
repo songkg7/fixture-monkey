@@ -19,6 +19,7 @@
 package com.navercorp.fixturemonkey.api.arbitrary;
 
 import java.lang.reflect.Proxy;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -79,5 +80,23 @@ final class NullInjectCombinableArbitrary<T> implements CombinableArbitrary<T> {
 		}
 		int currentSeed = Randoms.nextInt(1000);
 		return currentSeed < frequencyNull ? null : object;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		NullInjectCombinableArbitrary<?> that = (NullInjectCombinableArbitrary<?>)obj;
+		return Double.compare(nullProbability, that.nullProbability) == 0
+			&& Objects.equals(combinableArbitrary, that.combinableArbitrary);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(combinableArbitrary, nullProbability);
 	}
 }

@@ -20,6 +20,7 @@ package com.navercorp.fixturemonkey.api.arbitrary;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 import org.apiguardian.api.API;
@@ -77,5 +78,23 @@ final class ObjectCombinableArbitrary<T> implements CombinableArbitrary<T> {
 	@Override
 	public boolean fixed() {
 		return combinableArbitrariesByArbitraryProperty.values().stream().allMatch(CombinableArbitrary::fixed);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		ObjectCombinableArbitrary<?> that = (ObjectCombinableArbitrary<?>)obj;
+		return Objects.equals(combinableArbitrariesByArbitraryProperty, that.combinableArbitrariesByArbitraryProperty)
+			&& Objects.equals(combinator, that.combinator);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(combinableArbitrariesByArbitraryProperty, combinator);
 	}
 }

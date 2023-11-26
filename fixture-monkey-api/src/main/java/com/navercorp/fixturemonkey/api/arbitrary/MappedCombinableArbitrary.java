@@ -18,6 +18,7 @@
 
 package com.navercorp.fixturemonkey.api.arbitrary;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 import org.apiguardian.api.API;
@@ -69,5 +70,23 @@ final class MappedCombinableArbitrary<T, U> implements CombinableArbitrary<U> {
 	@Override
 	public boolean fixed() {
 		return combinableArbitrary.fixed();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		MappedCombinableArbitrary<?, ?> that = (MappedCombinableArbitrary<?, ?>)obj;
+		return Objects.equals(combinableArbitrary, that.combinableArbitrary)
+			&& Objects.equals(mapper, that.mapper);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(combinableArbitrary, mapper);
 	}
 }

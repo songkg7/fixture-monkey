@@ -65,10 +65,8 @@ public final class ArbitraryResolver {
 		this.registeredArbitraryBuilders = registeredArbitraryBuilders;
 	}
 
-	public CombinableArbitrary<?> resolve(
-		RootProperty rootProperty,
-		ArbitraryBuilderContext builderContext
-	) {
+	public CombinableArbitrary<?> resolve(ArbitraryBuilderContext builderContext) {
+		RootProperty rootProperty = builderContext.getRootProperty();
 		List<ArbitraryManipulator> manipulators = builderContext.getManipulators();
 		List<ContainerInfoManipulator> containerInfoManipulators = builderContext.getContainerInfoManipulators();
 		Map<Class<?>, List<Property>> propertyConfigurers = builderContext.getPropertyConfigurers();

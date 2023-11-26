@@ -23,6 +23,7 @@ import static com.navercorp.fixturemonkey.api.type.Types.generateAnnotatedTypeWi
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Type;
+import java.util.Objects;
 
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
@@ -50,5 +51,22 @@ public abstract class TypeReference<T> {
 
 	public boolean isGenericType() {
 		return Types.getActualType(annotatedType.getType()).getTypeParameters().length != 0;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		TypeReference<?> that = (TypeReference<?>)obj;
+		return Objects.equals(annotatedType.getType(), that.annotatedType.getType());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(annotatedType.getType());
 	}
 }

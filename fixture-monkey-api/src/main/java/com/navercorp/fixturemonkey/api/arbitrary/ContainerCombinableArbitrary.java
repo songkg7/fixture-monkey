@@ -19,6 +19,7 @@
 package com.navercorp.fixturemonkey.api.arbitrary;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -72,5 +73,23 @@ final class ContainerCombinableArbitrary<T> implements CombinableArbitrary<T> {
 	public boolean fixed() {
 		return combinableArbitraryList.stream()
 			.allMatch(CombinableArbitrary::fixed);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		ContainerCombinableArbitrary<?> that = (ContainerCombinableArbitrary<?>)obj;
+		return Objects.equals(combinableArbitraryList, that.combinableArbitraryList)
+			&& Objects.equals(combinator, that.combinator);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(combinableArbitraryList, combinator);
 	}
 }

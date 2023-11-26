@@ -33,4 +33,17 @@ public final class NodeKeyPredicate implements NextNodePredicate {
 
 		return property instanceof MapKeyElementProperty;
 	}
+
+	@Override
+	public int hashCode() {
+		return NodeKeyPredicate.class.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		return obj != null && getClass() == obj.getClass();
+	}
 }

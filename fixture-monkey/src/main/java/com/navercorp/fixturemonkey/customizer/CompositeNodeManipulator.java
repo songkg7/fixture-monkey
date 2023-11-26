@@ -20,6 +20,7 @@ package com.navercorp.fixturemonkey.customizer;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import com.navercorp.fixturemonkey.tree.ObjectNode;
 
@@ -35,5 +36,22 @@ public final class CompositeNodeManipulator implements NodeManipulator {
 		for (NodeManipulator manipulator : manipulators) {
 			manipulator.manipulate(objectNode);
 		}
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		CompositeNodeManipulator that = (CompositeNodeManipulator)obj;
+		return Objects.equals(manipulators, that.manipulators);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(manipulators);
 	}
 }

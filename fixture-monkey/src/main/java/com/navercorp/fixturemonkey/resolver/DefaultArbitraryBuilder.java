@@ -508,10 +508,7 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T>, Ex
 	private CombinableArbitrary<?> resolveArbitrary(ArbitraryBuilderContext context) {
 		if (context.isFixed()) {
 			if (context.getFixedCombinableArbitrary() == null || context.fixedExpired()) {
-				Object fixed = resolver.resolve(
-						rootProperty,
-						context
-					)
+				Object fixed = resolver.resolve(context)
 					.combined();
 				context.addManipulator(monkeyManipulatorFactory.newArbitraryManipulator("$", fixed));
 				context.renewFixed(CombinableArbitrary.from(fixed));
@@ -519,10 +516,7 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T>, Ex
 			return context.getFixedCombinableArbitrary();
 		}
 
-		return resolver.resolve(
-			rootProperty,
-			context
-		);
+		return resolver.resolve(context);
 	}
 
 	private String resolveExpression(ExpressionGenerator expressionGenerator) {
@@ -533,14 +527,15 @@ public final class DefaultArbitraryBuilder<T> implements ArbitraryBuilder<T>, Ex
 	}
 
 	private <R> DefaultArbitraryBuilder<R> generateArbitraryBuilderLazily(LazyArbitrary<R> lazyArbitrary) {
-		ArbitraryBuilderContext context = new ArbitraryBuilderContext();
+		RootProperty rootProperty = new RootProperty(new LazyAnnotatedType<>(lazyArbitrary::getValue));
+		ArbitraryBuilderContext context = new ArbitraryBuilderContext(rootProperty);
 		ArbitraryManipulator arbitraryManipulator =
 			monkeyManipulatorFactory.newArbitraryManipulator("$", lazyArbitrary);
 		context.addManipulator(arbitraryManipulator);
 
 		return new DefaultArbitraryBuilder<>(
 			fixtureMonkeyOptions,
-			new RootProperty(new LazyAnnotatedType<>(lazyArbitrary::getValue)),
+			rootProperty,
 			resolver,
 			traverser,
 			monkeyManipulatorFactory,

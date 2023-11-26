@@ -18,6 +18,7 @@
 
 package com.navercorp.fixturemonkey.jackson.introspector;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 import org.apiguardian.api.API;
@@ -43,6 +44,7 @@ public final class JacksonCombinableArbitrary<T> implements CombinableArbitrary<
 
 	/**
 	 * It would deserialize a serialized {@code jsonValue} object into an actual object.
+	 *
 	 * @return an actual object
 	 */
 	@Override
@@ -52,6 +54,7 @@ public final class JacksonCombinableArbitrary<T> implements CombinableArbitrary<
 
 	/**
 	 * It would generate a serialized object.
+	 *
 	 * @return a map representing JsonObject or JsonArray
 	 */
 	@Override
@@ -67,5 +70,23 @@ public final class JacksonCombinableArbitrary<T> implements CombinableArbitrary<
 	@Override
 	public boolean fixed() {
 		return false;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		JacksonCombinableArbitrary<?> that = (JacksonCombinableArbitrary<?>)obj;
+		return Objects.equals(jsonValue, that.jsonValue)
+			&& Objects.equals(deserializer, that.deserializer);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(jsonValue, deserializer);
 	}
 }

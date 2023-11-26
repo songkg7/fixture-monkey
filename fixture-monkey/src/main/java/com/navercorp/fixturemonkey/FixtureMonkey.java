@@ -106,6 +106,7 @@ public final class FixtureMonkey {
 			traverser,
 			fixtureMonkeyOptions.getDecomposedContainerValueFactory()
 		);
+
 		return new DefaultArbitraryBuilder<>(
 			fixtureMonkeyOptions,
 			rootProperty,
@@ -119,7 +120,7 @@ public final class FixtureMonkey {
 			),
 			traverser,
 			monkeyManipulatorFactory,
-			new ArbitraryBuilderContext(),
+			new ArbitraryBuilderContext(rootProperty),
 			registeredArbitraryBuilders,
 			monkeyContext,
 			fixtureMonkeyOptions.getInstantiatorProcessor()
@@ -133,7 +134,8 @@ public final class FixtureMonkey {
 			traverser,
 			fixtureMonkeyOptions.getDecomposedContainerValueFactory()
 		);
-		ArbitraryBuilderContext context = new ArbitraryBuilderContext();
+		RootProperty rootProperty = new RootProperty(new LazyAnnotatedType<>(() -> value));
+		ArbitraryBuilderContext context = new ArbitraryBuilderContext(rootProperty);
 
 		ArbitraryManipulator arbitraryManipulator =
 			monkeyManipulatorFactory.newArbitraryManipulator("$", value);
@@ -141,7 +143,7 @@ public final class FixtureMonkey {
 
 		return new DefaultArbitraryBuilder<>(
 			fixtureMonkeyOptions,
-			new RootProperty(new LazyAnnotatedType<>(() -> value)),
+			rootProperty,
 			new ArbitraryResolver(
 				traverser,
 				manipulatorOptimizer,

@@ -35,11 +35,13 @@ import org.apiguardian.api.API.Status;
 import com.navercorp.fixturemonkey.api.arbitrary.CombinableArbitrary;
 import com.navercorp.fixturemonkey.api.introspector.ArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.property.Property;
+import com.navercorp.fixturemonkey.api.property.RootProperty;
 import com.navercorp.fixturemonkey.customizer.ArbitraryManipulator;
 import com.navercorp.fixturemonkey.customizer.ContainerInfoManipulator;
 
 @API(since = "0.4.0", status = Status.MAINTAINED)
 public final class ArbitraryBuilderContext {
+	private final RootProperty rootProperty;
 	private final List<ArbitraryManipulator> manipulators;
 	private final List<ContainerInfoManipulator> containerInfoManipulators;
 	private final Map<Class<?>, List<Property>> propertyConfigurers;
@@ -53,6 +55,7 @@ public final class ArbitraryBuilderContext {
 	private CombinableArbitrary<?> fixedCombinableArbitrary;
 
 	public ArbitraryBuilderContext(
+		RootProperty rootProperty,
 		List<ArbitraryManipulator> manipulators,
 		List<ContainerInfoManipulator> containerInfoManipulators,
 		Map<Class<?>, List<Property>> propertyConfigurers,
@@ -61,6 +64,7 @@ public final class ArbitraryBuilderContext {
 		@Nullable FixedState fixedState,
 		@Nullable CombinableArbitrary<?> fixedCombinableArbitrary
 	) {
+		this.rootProperty = rootProperty;
 		this.manipulators = manipulators;
 		this.containerInfoManipulators = containerInfoManipulators;
 		this.propertyConfigurers = propertyConfigurers;
@@ -70,8 +74,8 @@ public final class ArbitraryBuilderContext {
 		this.fixedCombinableArbitrary = fixedCombinableArbitrary;
 	}
 
-	public ArbitraryBuilderContext() {
-		this(new ArrayList<>(), new ArrayList<>(), new HashMap<>(), new HashMap<>(), true, null, null);
+	public ArbitraryBuilderContext(RootProperty rootProperty) {
+		this(rootProperty, new ArrayList<>(), new ArrayList<>(), new HashMap<>(), new HashMap<>(), true, null, null);
 	}
 
 	public ArbitraryBuilderContext copy() {
@@ -80,6 +84,7 @@ public final class ArbitraryBuilderContext {
 			.collect(Collectors.toList());
 
 		return new ArbitraryBuilderContext(
+			rootProperty,
 			new ArrayList<>(this.manipulators),
 			copiedContainerInfoManipulators,
 			new HashMap<>(propertyConfigurers),
@@ -88,6 +93,10 @@ public final class ArbitraryBuilderContext {
 			fixedState,
 			fixedCombinableArbitrary
 		);
+	}
+
+	public RootProperty getRootProperty() {
+		return rootProperty;
 	}
 
 	public void addManipulator(ArbitraryManipulator arbitraryManipulator) {
@@ -163,6 +172,39 @@ public final class ArbitraryBuilderContext {
 		this.fixedCombinableArbitrary = fixedCombinableArbitrary;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		ArbitraryBuilderContext that = (ArbitraryBuilderContext)obj;
+		return validOnly == that.validOnly
+			&& Objects.equals(rootProperty, that.rootProperty)
+			&& Objects.equals(manipulators, that.manipulators)
+			&& Objects.equals(containerInfoManipulators, that.containerInfoManipulators)
+			&& Objects.equals(propertyConfigurers, that.propertyConfigurers)
+			&& Objects.equals(arbitraryIntrospectorsByType, that.arbitraryIntrospectorsByType)
+			&& Objects.equals(fixedState, that.fixedState)
+			&& Objects.equals(fixedCombinableArbitrary, that.fixedCombinableArbitrary);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(
+			rootProperty,
+			manipulators,
+			containerInfoManipulators,
+			propertyConfigurers,
+			arbitraryIntrospectorsByType,
+			validOnly,
+			fixedState,
+			fixedCombinableArbitrary
+		);
+	}
+
 	@Nullable
 	public CombinableArbitrary<?> getFixedCombinableArbitrary() {
 		return fixedCombinableArbitrary;
@@ -183,6 +225,24 @@ public final class ArbitraryBuilderContext {
 
 		public int getFixedContainerManipulatorSize() {
 			return fixedContainerManipulatorSize;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null || getClass() != obj.getClass()) {
+				return false;
+			}
+			FixedState that = (FixedState)obj;
+			return fixedManipulateSize == that.fixedManipulateSize
+				&& fixedContainerManipulatorSize == that.fixedContainerManipulatorSize;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(fixedManipulateSize, fixedContainerManipulatorSize);
 		}
 	}
 }

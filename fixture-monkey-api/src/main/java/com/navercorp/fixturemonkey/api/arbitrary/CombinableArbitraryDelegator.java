@@ -18,6 +18,8 @@
 
 package com.navercorp.fixturemonkey.api.arbitrary;
 
+import java.util.Objects;
+
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
@@ -47,5 +49,22 @@ public final class CombinableArbitraryDelegator<T> implements CombinableArbitrar
 	@Override
 	public boolean fixed() {
 		return delegated.fixed();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		CombinableArbitraryDelegator<?> that = (CombinableArbitraryDelegator<?>)obj;
+		return Objects.equals(delegated, that.delegated);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(delegated);
 	}
 }

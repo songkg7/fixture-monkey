@@ -38,4 +38,17 @@ public final class NodeAllElementPredicate implements NextNodePredicate {
 
 		return true;
 	}
+
+	@Override
+	public int hashCode() {
+		return NodeAllElementPredicate.class.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		return obj != null && getClass() == obj.getClass();
+	}
 }

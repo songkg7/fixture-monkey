@@ -18,6 +18,8 @@
 
 package com.navercorp.fixturemonkey.customizer;
 
+import java.util.Objects;
+
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
@@ -71,5 +73,22 @@ public final class NodeSetLazyManipulator<T> implements NodeManipulator {
 			new NodeSetDecomposedValueManipulator<>(sequence, traverser, decomposedContainerValueFactory, value);
 		nodeSetDecomposedValueManipulator.manipulate(objectNode);
 		lazyArbitrary.clear();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		NodeSetLazyManipulator<?> that = (NodeSetLazyManipulator<?>)obj;
+		return sequence == that.sequence && Objects.equals(lazyArbitrary, that.lazyArbitrary);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(sequence, lazyArbitrary);
 	}
 }
