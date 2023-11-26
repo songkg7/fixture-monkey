@@ -9,7 +9,7 @@ plugins {
 }
 
 multiRelease {
-    targetVersions(8, 17)
+    targetVersions(8, 17, 21)
 }
 
 dependencies {
@@ -21,6 +21,7 @@ dependencies {
     compileOnly("com.github.mifmif:generex:1.0.2")
 
     java17Implementation("org.apiguardian:apiguardian-api:1.1.2")
+    java21Implementation("org.apiguardian:apiguardian-api:1.1.2")
 
     testImplementation("net.jqwik:jqwik-engine:${JQWIK_VERSION}")
     testImplementation("net.jqwik:jqwik-api:${JQWIK_VERSION}")

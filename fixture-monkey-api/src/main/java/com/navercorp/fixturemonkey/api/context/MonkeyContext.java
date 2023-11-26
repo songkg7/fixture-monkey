@@ -21,26 +21,29 @@ package com.navercorp.fixturemonkey.api.context;
 import static com.navercorp.fixturemonkey.api.type.Types.isJavaType;
 
 import java.util.TreeMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 
 import com.navercorp.fixturemonkey.api.arbitrary.CombinableArbitrary;
 import com.navercorp.fixturemonkey.api.container.ConcurrentLruCache;
+import com.navercorp.fixturemonkey.api.container.LruCache;
 import com.navercorp.fixturemonkey.api.property.Property;
 import com.navercorp.fixturemonkey.api.property.RootProperty;
 import com.navercorp.fixturemonkey.api.type.Types;
 
 @API(since = "0.4.0", status = Status.MAINTAINED)
 public final class MonkeyContext {
-	private final ConcurrentLruCache<Property, CombinableArbitrary<?>> arbitrariesByProperty;
-	private final ConcurrentLruCache<Property, CombinableArbitrary<?>> javaArbitrariesByProperty;
-	private final ConcurrentLruCache<RootProperty, MonkeyGeneratorContext> generatorContextByRootProperty;
+	private final LruCache<Property, CombinableArbitrary<?>> arbitrariesByProperty;
+	private final LruCache<Property, CombinableArbitrary<?>> javaArbitrariesByProperty;
+	private final LruCache<RootProperty, MonkeyGeneratorContext> generatorContextByRootProperty;
+	private final ReentrantLock lock = new ReentrantLock();
 
 	public MonkeyContext(
-		ConcurrentLruCache<Property, CombinableArbitrary<?>> arbitrariesByProperty,
-		ConcurrentLruCache<Property, CombinableArbitrary<?>> javaArbitrariesByProperty,
-		ConcurrentLruCache<RootProperty, MonkeyGeneratorContext> generatorContextByRootProperty
+		LruCache<Property, CombinableArbitrary<?>> arbitrariesByProperty,
+		LruCache<Property, CombinableArbitrary<?>> javaArbitrariesByProperty,
+		LruCache<RootProperty, MonkeyGeneratorContext> generatorContextByRootProperty
 	) {
 		this.arbitrariesByProperty = arbitrariesByProperty;
 		this.javaArbitrariesByProperty = javaArbitrariesByProperty;
@@ -62,11 +65,21 @@ public final class MonkeyContext {
 	public void putCachedArbitrary(Property property, CombinableArbitrary<?> combinableArbitrary) {
 		Class<?> type = Types.getActualType(property.getType());
 		if (isJavaType(type)) {
-			javaArbitrariesByProperty.putIfAbsent(property, combinableArbitrary);
+			lock.lock();
+			try {
+				javaArbitrariesByProperty.putIfAbsent(property, combinableArbitrary);
+			} finally {
+				lock.unlock();
+			}
 			return;
 		}
 
-		arbitrariesByProperty.put(property, combinableArbitrary);
+		lock.lock();
+		try {
+			arbitrariesByProperty.put(property, combinableArbitrary);
+		}finally {
+			lock.unlock();
+		}
 	}
 
 	public MonkeyGeneratorContext retrieveGeneratorContext(RootProperty rootProperty) {

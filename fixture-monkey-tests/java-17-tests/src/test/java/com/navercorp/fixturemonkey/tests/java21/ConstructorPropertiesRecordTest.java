@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.navercorp.fixturemonkey.tests.java17;
+package com.navercorp.fixturemonkey.tests.java21;
 
 import static com.navercorp.fixturemonkey.tests.TestEnvironment.TEST_COUNT;
 import static org.assertj.core.api.BDDAssertions.then;
@@ -25,12 +25,12 @@ import org.junit.jupiter.api.RepeatedTest;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
-import com.navercorp.fixturemonkey.tests.java17.RecordTestSpecs.ComplexContainerRecord;
-import com.navercorp.fixturemonkey.tests.java17.RecordTestSpecs.ContainerRecord;
-import com.navercorp.fixturemonkey.tests.java17.RecordTestSpecs.DateTimeRecord;
-import com.navercorp.fixturemonkey.tests.java17.RecordTestSpecs.JavaTypeRecord;
-import com.navercorp.fixturemonkey.tests.java17.RecordTestSpecs.NoArgsConstructorRecord;
-import com.navercorp.fixturemonkey.tests.java17.RecordTestSpecs.TwoConstructorsRecord;
+import com.navercorp.fixturemonkey.tests.java21.RecordTestSpecs.ComplexContainerRecord;
+import com.navercorp.fixturemonkey.tests.java21.RecordTestSpecs.ContainerRecord;
+import com.navercorp.fixturemonkey.tests.java21.RecordTestSpecs.DateTimeRecord;
+import com.navercorp.fixturemonkey.tests.java21.RecordTestSpecs.JavaTypeRecord;
+import com.navercorp.fixturemonkey.tests.java21.RecordTestSpecs.NoArgsConstructorRecord;
+import com.navercorp.fixturemonkey.tests.java21.RecordTestSpecs.TwoConstructorsRecord;
 
 class ConstructorPropertiesRecordTest {
 	private static final FixtureMonkey SUT = FixtureMonkey.builder()

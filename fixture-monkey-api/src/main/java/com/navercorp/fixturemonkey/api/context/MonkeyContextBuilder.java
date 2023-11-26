@@ -23,33 +23,34 @@ import org.apiguardian.api.API.Status;
 
 import com.navercorp.fixturemonkey.api.arbitrary.CombinableArbitrary;
 import com.navercorp.fixturemonkey.api.container.ConcurrentLruCache;
+import com.navercorp.fixturemonkey.api.container.LruCache;
 import com.navercorp.fixturemonkey.api.property.Property;
 import com.navercorp.fixturemonkey.api.property.RootProperty;
 
 @API(since = "0.4.0", status = Status.MAINTAINED)
 public final class MonkeyContextBuilder {
-	private ConcurrentLruCache<Property, CombinableArbitrary<?>> arbitrariesByProperty;
-	private ConcurrentLruCache<Property, CombinableArbitrary<?>> javaArbitrariesByProperty;
-	private ConcurrentLruCache<RootProperty, MonkeyGeneratorContext> generatorContextByRootProperty;
+	private LruCache<Property, CombinableArbitrary<?>> arbitrariesByProperty;
+	private LruCache<Property, CombinableArbitrary<?>> javaArbitrariesByProperty;
+	private LruCache<RootProperty, MonkeyGeneratorContext> generatorContextByRootProperty;
 	private int cacheSize = 2048;
 	private int generatorContextSize = 1000;
 
 	public MonkeyContextBuilder arbitrariesByProperty(
-		ConcurrentLruCache<Property, CombinableArbitrary<?>> arbitrariesByProperty
+		LruCache<Property, CombinableArbitrary<?>> arbitrariesByProperty
 	) {
 		this.arbitrariesByProperty = arbitrariesByProperty;
 		return this;
 	}
 
 	public MonkeyContextBuilder javaArbitrariesByClass(
-		ConcurrentLruCache<Property, CombinableArbitrary<?>> javaArbitrariesByClass
+		LruCache<Property, CombinableArbitrary<?>> javaArbitrariesByClass
 	) {
 		this.javaArbitrariesByProperty = javaArbitrariesByClass;
 		return this;
 	}
 
 	public MonkeyContextBuilder generatorContextByRootProperty(
-		ConcurrentLruCache<RootProperty, MonkeyGeneratorContext> generatorContextByRootProperty
+		LruCache<RootProperty, MonkeyGeneratorContext> generatorContextByRootProperty
 	) {
 		this.generatorContextByRootProperty = generatorContextByRootProperty;
 		return this;
@@ -67,15 +68,15 @@ public final class MonkeyContextBuilder {
 
 	public MonkeyContext build() {
 		if (arbitrariesByProperty == null) {
-			arbitrariesByProperty = new ConcurrentLruCache<>(cacheSize);
+			arbitrariesByProperty = new LruCache<>(cacheSize);
 		}
 
 		if (javaArbitrariesByProperty == null) {
-			javaArbitrariesByProperty = new ConcurrentLruCache<>(cacheSize);
+			javaArbitrariesByProperty = new LruCache<>(cacheSize);
 		}
 
 		if (generatorContextByRootProperty == null) {
-			generatorContextByRootProperty = new ConcurrentLruCache<>(generatorContextSize);
+			generatorContextByRootProperty = new LruCache<>(generatorContextSize);
 		}
 
 		return new MonkeyContext(

@@ -60,6 +60,7 @@ public final class ArbitraryGeneratorContext implements Traceable {
 	private final int generateUniqueMaxTries;
 	private final AtomicReference<CombinableArbitrary<?>> generated =
 		new AtomicReference<>(CombinableArbitrary.NOT_GENERATED);
+	private final ResolveArbitraryProcessor processor = new ResolveArbitraryProcessor();
 
 	public ArbitraryGeneratorContext(
 		Property resolvedProperty,
@@ -169,12 +170,6 @@ public final class ArbitraryGeneratorContext implements Traceable {
 	}
 
 	private Map<ArbitraryProperty, CombinableArbitrary<?>> initArbitraryListByArbitraryProperty() {
-		Map<ArbitraryProperty, CombinableArbitrary<?>> childrenValues = new LinkedHashMap<>();
-		for (ArbitraryProperty child : this.getChildren()) {
-			CombinableArbitrary<?> arbitrary = this.resolveArbitrary.apply(this, child);
-			childrenValues.put(child, arbitrary);
-		}
-
-		return childrenValues;
+		return processor.resolve(this, this.getChildren(), this.resolveArbitrary);
 	}
 }
