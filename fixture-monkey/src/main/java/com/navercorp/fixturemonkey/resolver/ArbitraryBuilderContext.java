@@ -90,7 +90,9 @@ public final class ArbitraryBuilderContext {
 			new HashMap<>(propertyConfigurers),
 			new HashMap<>(arbitraryIntrospectorsByType),
 			this.validOnly,
-			fixedState,
+			fixedState == null
+				? null
+				: new FixedState(fixedState.fixedManipulateSize, fixedState.fixedContainerManipulatorSize),
 			fixedCombinableArbitrary
 		);
 	}

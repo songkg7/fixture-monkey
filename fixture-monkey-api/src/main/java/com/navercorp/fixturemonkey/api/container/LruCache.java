@@ -24,6 +24,7 @@ public final class LruCache<K, V> extends LinkedHashMap<K, V> {
 
 	@Override
 	protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+		System.out.println(size());
 		return size() > maxSize;
 	}
 }

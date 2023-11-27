@@ -31,6 +31,7 @@ import org.apiguardian.api.API.Status;
 
 import net.jqwik.api.Arbitrary;
 
+import com.navercorp.fixturemonkey.api.container.LruCache;
 import com.navercorp.fixturemonkey.api.context.MonkeyContext;
 import com.navercorp.fixturemonkey.api.matcher.MatcherOperator;
 import com.navercorp.fixturemonkey.api.option.FixtureMonkeyOptions;
@@ -55,6 +56,7 @@ public final class FixtureMonkey {
 	private final MonkeyContext monkeyContext;
 	private final List<MatcherOperator<? extends ArbitraryBuilder<?>>> registeredArbitraryBuilders = new ArrayList<>();
 	private final MonkeyExpressionFactory monkeyExpressionFactory;
+	private final LruCache<RootProperty, ArbitraryResolver> resolverCache = new LruCache<>(128);
 
 	public FixtureMonkey(
 		FixtureMonkeyOptions fixtureMonkeyOptions,
@@ -107,17 +109,22 @@ public final class FixtureMonkey {
 			fixtureMonkeyOptions.getDecomposedContainerValueFactory()
 		);
 
-		return new DefaultArbitraryBuilder<>(
-			fixtureMonkeyOptions,
+		ArbitraryResolver arbitraryResolver = resolverCache.computeIfAbsent(
 			rootProperty,
-			new ArbitraryResolver(
+			r -> new ArbitraryResolver(
 				traverser,
 				manipulatorOptimizer,
 				monkeyManipulatorFactory,
 				fixtureMonkeyOptions,
 				monkeyContext,
 				registeredArbitraryBuilders
-			),
+			)
+		);
+
+		return new DefaultArbitraryBuilder<>(
+			fixtureMonkeyOptions,
+			rootProperty,
+			arbitraryResolver,
 			traverser,
 			monkeyManipulatorFactory,
 			new ArbitraryBuilderContext(rootProperty),

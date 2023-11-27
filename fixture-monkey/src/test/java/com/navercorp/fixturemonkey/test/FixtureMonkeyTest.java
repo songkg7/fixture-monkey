@@ -513,7 +513,7 @@ class FixtureMonkeyTest {
 		then(actual).isEqualTo("set");
 	}
 
-	@Property
+	@Property(tries = 1000)
 	void acceptIf() {
 		// when
 		String actual = SUT.giveMeBuilder(ComplexObject.class)

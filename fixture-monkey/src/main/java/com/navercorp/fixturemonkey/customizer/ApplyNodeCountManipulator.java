@@ -48,11 +48,11 @@ public final class ApplyNodeCountManipulator implements NodeManipulator {
 			return false;
 		}
 		ApplyNodeCountManipulator that = (ApplyNodeCountManipulator)obj;
-		return count == that.count && Objects.equals(nodeManipulator, that.nodeManipulator);
+		return Objects.equals(nodeManipulator, that.nodeManipulator);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(nodeManipulator, count);
+		return Objects.hash(nodeManipulator);
 	}
 }

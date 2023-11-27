@@ -77,12 +77,11 @@ public final class UnSafeLazyArbitraryImpl<T> implements LazyArbitrary<T> {
 		}
 		UnSafeLazyArbitraryImpl<?> that = (UnSafeLazyArbitraryImpl<?>)obj;
 		return fixed == that.fixed
-			&& Objects.equals(initializer, that.initializer)
-			&& Objects.equals(value, that.value);
+			&& Objects.equals(initializer, that.initializer);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(initializer, fixed, value);
+		return Objects.hash(initializer, fixed);
 	}
 }

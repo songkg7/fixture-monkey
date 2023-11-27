@@ -20,6 +20,7 @@ package com.navercorp.fixturemonkey.customizer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apiguardian.api.API;
@@ -119,5 +120,21 @@ public final class ContainerInfoManipulator {
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null || getClass() != obj.getClass())
+			return false;
+		ContainerInfoManipulator that = (ContainerInfoManipulator)obj;
+		return manipulatingSequence == that.manipulatingSequence && Objects.equals(nextNodePredicates,
+			that.nextNodePredicates) && Objects.equals(containerInfo, that.containerInfo);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(nextNodePredicates, containerInfo, manipulatingSequence);
 	}
 }

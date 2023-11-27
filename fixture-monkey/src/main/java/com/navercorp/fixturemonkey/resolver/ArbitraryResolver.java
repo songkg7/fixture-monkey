@@ -28,6 +28,7 @@ import org.apiguardian.api.API.Status;
 
 import com.navercorp.fixturemonkey.ArbitraryBuilder;
 import com.navercorp.fixturemonkey.api.arbitrary.CombinableArbitrary;
+import com.navercorp.fixturemonkey.api.container.LruCache;
 import com.navercorp.fixturemonkey.api.context.MonkeyContext;
 import com.navercorp.fixturemonkey.api.introspector.ArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.matcher.MatcherOperator;
@@ -48,6 +49,7 @@ public final class ArbitraryResolver {
 	private final FixtureMonkeyOptions fixtureMonkeyOptions;
 	private final MonkeyContext monkeyContext;
 	private final List<MatcherOperator<? extends ArbitraryBuilder<?>>> registeredArbitraryBuilders;
+	private final LruCache<ArbitraryBuilderContext, CombinableArbitrary<?>> arbitraryCache = new LruCache<>(256);
 
 	public ArbitraryResolver(
 		ArbitraryTraverser traverser,
@@ -82,44 +84,48 @@ public final class ArbitraryResolver {
 		Map<Class<?>, ArbitraryIntrospector> arbitraryIntrospectorConfigurers =
 			builderContext.getArbitraryIntrospectorsByType();
 
-		return new ResolvedCombinableArbitrary<>(
-			rootProperty,
-			() -> new ObjectTree(
+		// ???????
+		return arbitraryCache.computeIfAbsent(
+			builderContext,
+			bc -> new ResolvedCombinableArbitrary<>(
 				rootProperty,
-				this.traverser.traverse(
+				() -> new ObjectTree(
 					rootProperty,
-					containerInfoManipulators,
-					registeredContainerInfoManipulators,
-					propertyConfigurers
+					this.traverser.traverse(
+						rootProperty,
+						containerInfoManipulators,
+						registeredContainerInfoManipulators,
+						propertyConfigurers
+					),
+					fixtureMonkeyOptions,
+					monkeyContext,
+					builderContext.isValidOnly(),
+					arbitraryIntrospectorConfigurers
 				),
-				fixtureMonkeyOptions,
-				monkeyContext,
-				builderContext.isValidOnly(),
-				arbitraryIntrospectorConfigurers
-			),
-			objectTree -> {
-				List<ArbitraryManipulator> registeredManipulators =
-					monkeyManipulatorFactory.newRegisteredArbitraryManipulators(
-						registeredArbitraryBuilders,
-						objectTree.getMetadata().getNodesByProperty()
-					);
+				objectTree -> {
+					List<ArbitraryManipulator> registeredManipulators =
+						monkeyManipulatorFactory.newRegisteredArbitraryManipulators(
+							registeredArbitraryBuilders,
+							objectTree.getMetadata().getNodesByProperty()
+						);
 
-				List<ArbitraryManipulator> joinedManipulators =
-					Stream.concat(registeredManipulators.stream(), manipulators.stream())
-						.collect(Collectors.toList());
+					List<ArbitraryManipulator> joinedManipulators =
+						Stream.concat(registeredManipulators.stream(), manipulators.stream())
+							.collect(Collectors.toList());
 
-				List<ArbitraryManipulator> optimizedManipulator = manipulatorOptimizer
-					.optimize(joinedManipulators)
-					.getManipulators();
+					List<ArbitraryManipulator> optimizedManipulator = manipulatorOptimizer
+						.optimize(joinedManipulators)
+						.getManipulators();
 
-				for (ArbitraryManipulator manipulator : optimizedManipulator) {
-					manipulator.manipulate(objectTree);
-				}
-				return objectTree.generate();
-			},
-			fixtureMonkeyOptions.getGenerateMaxTries(),
-			fixtureMonkeyOptions.getDefaultArbitraryValidator(),
-			builderContext.isValidOnly()
+					for (ArbitraryManipulator manipulator : optimizedManipulator) {
+						manipulator.manipulate(objectTree);
+					}
+					return objectTree.generate();
+				},
+				fixtureMonkeyOptions.getGenerateMaxTries(),
+				fixtureMonkeyOptions.getDefaultArbitraryValidator(),
+				builderContext.isValidOnly()
+			)
 		);
 	}
 }
