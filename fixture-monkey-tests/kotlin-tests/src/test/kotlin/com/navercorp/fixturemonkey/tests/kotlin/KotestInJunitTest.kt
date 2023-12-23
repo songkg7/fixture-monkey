@@ -24,7 +24,6 @@ import com.navercorp.fixturemonkey.kotest.KotestPlugin
 import com.navercorp.fixturemonkey.kotlin.KotlinPlugin
 import com.navercorp.fixturemonkey.kotlin.giveMeBuilder
 import com.navercorp.fixturemonkey.kotlin.giveMeOne
-import com.navercorp.fixturemonkey.kotlin.setPostCondition
 import com.navercorp.fixturemonkey.tests.TestEnvironment.TEST_COUNT
 import org.assertj.core.api.BDDAssertions.then
 import org.junit.jupiter.api.RepeatedTest
@@ -720,7 +719,7 @@ class KotestInJunitTest {
         class StringObject(val string: String)
 
         val actual = SUT.giveMeBuilder<StringObject>()
-            .setPostCondition<StringObject, String>("string") {
+            .setPostCondition<String>("string") {
                 it.length < 5
             }
             .sample()

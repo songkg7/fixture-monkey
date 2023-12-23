@@ -36,11 +36,13 @@ import com.navercorp.fixturemonkey.kotlin.setExp
 import com.navercorp.fixturemonkey.kotlin.setExpGetter
 import com.navercorp.fixturemonkey.kotlin.sizeExp
 import com.navercorp.fixturemonkey.kotlin.sizeExpGetter
+import com.navercorp.fixturemonkey.tests.TestEnvironment.TEST_COUNT
 import com.navercorp.fixturemonkey.tests.kotlin.ImmutableJavaTestSpecs.ArrayObject
 import com.navercorp.fixturemonkey.tests.kotlin.ImmutableJavaTestSpecs.NestedArrayObject
 import com.navercorp.fixturemonkey.tests.kotlin.JavaConstructorTestSpecs.JavaTypeObject
 import org.assertj.core.api.BDDAssertions.then
 import org.assertj.core.api.BDDAssertions.thenThrownBy
+import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import java.util.UUID
 import kotlin.reflect.jvm.javaMethod
@@ -197,6 +199,30 @@ class KotlinTest {
         val actual = sut.giveMeOne<UUID>()
 
         then(actual).isNotNull
+    }
+
+    @RepeatedTest(TEST_COUNT)
+    fun setPostCondition() {
+        class StringObject(val string: String)
+
+        val actual = SUT.giveMeBuilder<StringObject>()
+            .setPostCondition<String>("string") { it.length < 5 }
+            .sample()
+            .string
+
+        then(actual).hasSizeLessThan(5)
+    }
+
+    @RepeatedTest(TEST_COUNT)
+    fun setPostConditionWithProperty() {
+        class StringObject(val string: String)
+
+        val actual = SUT.giveMeBuilder<StringObject>()
+            .setPostCondition<String>(StringObject::string) { it.length < 5 }
+            .sample()
+            .string
+
+        then(actual).hasSizeLessThan(5)
     }
 
     companion object {
