@@ -49,7 +49,8 @@ public final class FieldPropertyGenerator implements PropertyGenerator {
 			.filter(fieldPredicate)
 			.map(field -> new FieldProperty(
 				Types.resolveWithTypeReferenceGenerics(property.getAnnotatedType(), field.getAnnotatedType()),
-				field
+				field,
+				null
 			))
 			.filter(matcher::match)
 			.collect(Collectors.toList());

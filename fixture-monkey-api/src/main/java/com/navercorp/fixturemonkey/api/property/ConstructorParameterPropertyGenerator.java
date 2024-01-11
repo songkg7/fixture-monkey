@@ -143,7 +143,8 @@ public final class ConstructorParameterPropertyGenerator implements PropertyGene
 			Property fieldProperty = field != null
 				? new FieldProperty(
 				Types.resolveWithTypeReferenceGenerics(property.getAnnotatedType(), field.getAnnotatedType()),
-				field
+				field,
+				null
 			)
 				: null;
 

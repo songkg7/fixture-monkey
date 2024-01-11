@@ -38,14 +38,15 @@ import org.apiguardian.api.API.Status;
 import com.navercorp.fixturemonkey.api.type.TypeCache;
 
 @API(since = "0.4.0", status = Status.MAINTAINED)
-public final class FieldProperty implements Property {
+public final class FieldProperty implements DefaultArgumentProperty {
 	private final AnnotatedType annotatedType;
 	private final Field field;
 	private final List<Annotation> annotations;
 	private final Map<Class<? extends Annotation>, Annotation> annotationsMap;
+	private final Object defaultArgument;
 
 	public FieldProperty(Field field) {
-		this(TypeCache.getAnnotatedType(field), field);
+		this(TypeCache.getAnnotatedType(field), field, null);
 	}
 
 	/**
@@ -57,9 +58,10 @@ public final class FieldProperty implements Property {
 	 * @param field         field of the property
 	 * @see com.navercorp.fixturemonkey.api.type.Types
 	 */
-	public FieldProperty(AnnotatedType annotatedType, Field field) {
+	public FieldProperty(AnnotatedType annotatedType, Field field, @Nullable Object defaultArgument) {
 		this.annotatedType = annotatedType;
 		this.field = field;
+		this.defaultArgument = null;
 		this.annotations = Arrays.asList(field.getAnnotations());
 		this.annotationsMap = this.annotations.stream()
 			.collect(Collectors.toMap(Annotation::annotationType, Function.identity(), (a1, a2) -> a1));
@@ -133,5 +135,11 @@ public final class FieldProperty implements Property {
 		return "FieldProperty{"
 			+ "annotatedType=" + annotatedType
 			+ ", field=" + field + '}';
+	}
+
+	@Override
+	@Nullable
+	public Object getArgument() {
+		return defaultArgument;
 	}
 }

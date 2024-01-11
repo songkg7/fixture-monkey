@@ -42,6 +42,7 @@ import com.navercorp.fixturemonkey.api.generator.IntrospectedArbitraryGenerator;
 import com.navercorp.fixturemonkey.api.generator.ValidateArbitraryGenerator;
 import com.navercorp.fixturemonkey.api.introspector.ArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.option.FixtureMonkeyOptions;
+import com.navercorp.fixturemonkey.api.property.DefaultArgumentProperty;
 import com.navercorp.fixturemonkey.api.property.Property;
 import com.navercorp.fixturemonkey.api.property.RootProperty;
 import com.navercorp.fixturemonkey.api.type.Types;
@@ -144,6 +145,10 @@ public final class ObjectTree {
 			if (node.cacheable() && cached != null) {
 				generated = cached;
 			} else {
+				if (node.getProperty() instanceof DefaultArgumentProperty) {
+					return CombinableArbitrary.from(((DefaultArgumentProperty)node.getProperty()).getArgument());
+				}
+
 				ArbitraryGeneratorContext childArbitraryGeneratorContext = this.generateContext(node, currentContext);
 				ArbitraryIntrospector arbitraryIntrospector = arbitraryIntrospectorConfigurer.get(
 					Types.getActualType(node.getProperty().getType())
